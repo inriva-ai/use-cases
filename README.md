@@ -2,7 +2,7 @@
 
 - [Introduction](#introduction)
 - [Use Cases](#use-cases)
-  - [Use Case 1: Patient Note Summarization](#use-case-1-predictive-maintenance)
+  - [Use Case 1: Patient Note Summarization](#use-case-1-patient-note-summarization)
 - [License]([license](LICENSE))
 
 # Introduction
