@@ -1,0 +1,5 @@
+pandas==2.2.3
+sqlite-utils==3.38
+openai==1.66.3
+langchain-community==0.3.19
+langchain-experimental==0.3.4

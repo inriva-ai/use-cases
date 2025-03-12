@@ -27,7 +27,7 @@ Please note that the example implements only a subset of functional and technica
 ## **Key Technical Requirements**
 
 ### **1. Retrieval-Augmented Generation (RAG) Framework**
-- The solution should use a **RAG-based approach** to retrieve relevant medical records and generate accurate patient summaries. Specifically, RAG Haystack framework.
+- The solution should use a **RAG-based approach** to retrieve relevant medical records and generate accurate patient summaries. Specifically, LangChain framework.
 
 ### **2. Data Source**
 - The system must load relational patient data from a set of csv files. These files are 
@@ -50,8 +50,8 @@ Please note that the example implements only a subset of functional and technica
     - immunizations.csv
     - medications.csv
 
-### **3. Vector Database for Chunking & Indexing**
-- A **vector database** Milvus should be used to **efficiently retrieve relevant patient records**.
+### **3. Data Retrieval**
+- The solution should use a **LangChain SQL chain** to **efficiently retrieve relevant patient records**.
 
 ### **4. Tech Stack**
 - The system should be implemented using **Python** and Haystack RAG framework 
@@ -70,41 +70,33 @@ Please note that the example implements only a subset of functional and technica
 
 The solution architecture focuses on two major pipeline:
 
-- **Data Ingestion**: Processing CSV files, chunking data, embedding text, and storing it in a vector database.
+- **Data Retrieval**: Pulling relevant data from a read-only relational database in real time.
 - **Request Processing**: Retrieving relevant data, generating responses via LLMs, and presenting results through an interactive UI.
 
 
 ## 1. Architectural Components
 
-### 1.1 Data Ingestion Pipeline
+### 1.1 Data Retrieval
 1. **CSV Data Loader**  
    - **Tool**: `pandas`  
-   - **Reasoning**: Efficiently processes structured CSV data into DataFrames for further transformation.
+   - **Reasoning**: Ingest structured CSV data into a database.
 
-2. **Text Preprocessing & Chunking**  
-   - **Tool**: `LangChain DocumentLoaders`  
-   - **Reasoning**: Handles chunking of text data for efficient embedding and retrieval.
+2. **Relational Database**  
+   - **Tool**: `SQLite`  
+   - **Reasoning**: is used as a datasource.
 
-3. **Text Embedding Model**  
-   - **Tool**: `sentence-transformers` (e.g., `all-MiniLM-L6-v2`)  
-   - **Reasoning**: Generates dense vector embeddings optimized for retrieval tasks.
-
-4. **Vector Storage & Indexing**  
-   - **Tool**: `Milvus`  
-   - **Reasoning**: Optimized for scalable vector search, ensuring low-latency retrieval.
-
-### 1.2 Request Processing Pipeline
+### 1.2 Request Processing
 1. **Query Interface (Interactive UI)**  
    - **Tool**: `Langflow`  
    - **Reasoning**: Provides a no-code/low-code environment for query construction and LLM interaction.
 
 2. **Retrieval-Augmented Generation (RAG) Framework**  
-   - **Tool**: `Haystack`  
-   - **Reasoning**: Provides a structured pipeline for document retrieval and response generation.
+   - **Tool**: `LangChain`  
+   - **Reasoning**: Provides a structured pipeline for data retrieval and response generation.
 
-3. **Retriever (Vector Search Engine)**  
-   - **Tool**: `Milvus Retriever (Haystack)`  
-   - **Reasoning**: Efficiently finds the most relevant chunks of medical data.
+3. **SQL Retriever**  
+   - **Tool**: `LangChain SQL Chain`
+   - **Reasoning**: Uses a natural language prompt that gets converted into an appropriate SQL query to find the relevant medical data.
 
 4. **Prompt Templates**  
    - **Tool**: `Jinja2`  
@@ -129,14 +121,11 @@ The diagram below outlines the solution components grouped by pipeline.
 ```mermaid
 graph TD;
     subgraph Data Ingestion
-        A[CSV Loader] --> B[Text Chunking]
-        B --> C[Embedding Model]
-        C --> D[Vector Storage]
+        A[CSV Loader] --> B[Relational Database]
     end
     
     subgraph Query Processing
-        E[User Query] --> F[Retriever]
-        F --> G[Milvus Vector Search]
+        E[User Query] --> G[SQL Retriever]
         G --> H[Prompt Construction]
         H --> I[LLM Inference]
         I --> J[Response Generation]
@@ -150,17 +139,14 @@ graph TD;
 sequenceDiagram
     participant User
     participant UI as Langflow UI
-    participant Retriever as Haystack Retriever
-    participant Milvus as Milvus Vector DB
+    participant Retriever as SQL Retriever
     participant Prompt as Jinja2 Prompt Builder
     participant LLM as GPT-4 / LLamaIndex
     participant Output as Response Generator
 
     User->>UI: Enters query
     UI->>Retriever: Fetch relevant medical records
-    Retriever->>Milvus: Search vector embeddings
-    Milvus->>Retriever: Return relevant chunks
-    Retriever->>Prompt: Format structured prompt
+    Retriever->>Prompt: Search relevant patient records
     Prompt->>LLM: Pass structured query
     LLM->>Output: Generate medical summary
     Output->>UI: Display structured response
