@@ -1,17 +1,54 @@
-json_schema_sql = {
-            "title": "sql_query",
-            "description": "SQL query to retrieve data from a database.",
-            "type": "object",
-            "properties": {
-                "sql": {
-                    "type": "string",
-                    "description": "The SQL query to retrieve data from the database."
-                },
-            
-            },
+json_schema_client = {
+  "title": "generic_summary",
+  "description": "Structured format for summarization. Output only information relevant to the prompt. Do not output unavailable information.",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the summary."
+    },
+    "abstract": {
+      "type": "string",
+      "description": "A brief summary of the key findings and conclusions."
+    },
+    "context": {
+      "type": "string",
+      "description": "Background information relevant to the summary."
+    },
+    "key_points": {
+      "type": "array",
+      "description": "List of main points covered in the summary.",
+      "items": { "type": "string" }
+    },
+    "data": {
+      "type": "array",
+      "description": "Structured data relevant to the summary.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": { "type": "string", "description": "Category of the data." },
+          "details": { "type": "string", "description": "Details of the data entry." },
+          "date": { "type": "string", "format": "date", "description": "Date of relevance." }
+        }
+      }
+    },
+    "analysis": {
+      "type": "string",
+      "description": "Interpretation and analysis of the summarized information."
+    },
+    "recommendations": {
+      "type": "string",
+      "description": "Recommendations based on the summary."
+    },
+    "conclusion": {
+      "type": "string",
+      "description": "Final summary of findings and next steps."
+    }
+  },
+  "required": ["title", "abstract", "context", "key_points", "conclusion"]
 }
 
-json_schema_client = {
+json_schema_medical = {
     "title": "medical_note",
     "description": "Structured format for medical notes in research paper-like format. Output only information relevant to the prompt. Do not output unavailable information",
     "type": "object",
