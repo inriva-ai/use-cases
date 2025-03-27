@@ -37,8 +37,9 @@
 import os
 import pandas as pd
 import sqlite3
-import getpass
 import json
+import getpass
+from dotenv import load_dotenv
 
 # Imports needed for MemoryCache setup
 from langchain.globals import set_llm_cache
@@ -108,8 +109,15 @@ def initialize_database():
     
 def setup_openai_api_key():
     """Set up the OpenAI API key."""
-    if not os.getenv("OPENAI_API_KEY"):
-        os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter your OpenAI API key: ")
+    load_dotenv()
+    # Retrieve the API key from the environment
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("OpenAI API key not found. Please set it in the .env file.")
+    os.environ["OPENAI_API_KEY"] = api_key
+
+    # if not os.getenv("OPENAI_API_KEY"):
+    #     os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter your OpenAI API key: ")
   
 def generate_patient_summary(note_summarizer, template, first_name, last_name):
     """Generate a patient summary using all templates."""
