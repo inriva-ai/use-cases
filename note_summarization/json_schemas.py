@@ -138,3 +138,40 @@ json_schema_medical = {
     },
     "required": ["title", "abstract", "patient_details", "introduction", "conclusion"]
 }
+
+patient_templates = {
+    "medications": {
+        "name":  "medications",
+        "sql_prompt": "What medications are prescribed to the patient {patient_details}? Retrieve ALL medications for the patient.",
+        "prompt": "Summarize the patient's current medications:\n"
+
+    },
+    "symptoms": {
+        "name":  "encounters",
+        "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
+        "prompt": "Provide an overview of the patient's reported symptoms and their progression over time:\n {encounters_rows}"
+    },
+    "physical_exam": {
+        "name":  "physical_exam",
+        "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
+        "prompt": "What are the key points and key notes/observations from the patient's last physical examination?\n {physical_exam_rows}"
+    },
+    "consultation": {
+        "name":  "consultation",
+        "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
+        "prompt": "What are the key findings from the patient's last non well-visit consultation note?\n {consultation_rows}"
+    },
+    "immunizations": {
+        "name":  "immunizations",
+        "sql_prompt" : "Retrieve ALL immunizations for the patient {patient_details}.", 
+        "prompt": "Summarize the patient's immunizations:\n {immunizations_rows}"
+    },
+    "allergies": {
+        "name":  "allergies",
+        "sql_prompt": "In a single query retrieve ALL noted allergies or adverse reactions information for the patient {patient_details}.",
+        "prompt": "Highlight any noted allergies or adverse reactions documented in the patient's records.\n {allergies_rows}"
+    },
+}
+#    "history": "Summarize the patient's medical history relevant to their current condition.",
+#    "chronic_conditions": "Highlight any chronic conditions and their management plans documented in the patient's history.",
+#    "procedures": "Summarize the patient's relevant procedures and surgeries.",

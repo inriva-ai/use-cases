@@ -47,48 +47,11 @@ from langchain_community.cache import InMemoryCache
 
 # Imports from custom libraries
 from summarizer import Summarizer
-from json_schemas import json_schema_client,  json_schema_medical
+from json_schemas import json_schema_client,  json_schema_medical, patient_templates
 
 # Define constants
 DATA_DIR = "./data"  # Directory with your CSVs
 DB_PATH = "./healthcare_data.db"  # Path to your SQLite database
-
-PATIENT_TEMPLATES = {
-    "medications": {
-        "name":  "medications",
-        "sql_prompt": "What medications are prescribed to the patient {patient_details}? Retrieve ALL medications for the patient.",
-        "prompt": "Summarize the patient's current medications:\n"
-
-    },
-    "symptoms": {
-        "name":  "encounters",
-        "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
-        "prompt": "Provide an overview of the patient's reported symptoms and their progression over time:\n {encounters_rows}"
-    },
-    "physical_exam": {
-        "name":  "physical_exam",
-        "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
-        "prompt": "What are the key points and key notes/observations from the patient's last physical examination?\n {physical_exam_rows}"
-    },
-    "consultation": {
-        "name":  "consultation",
-        "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
-        "prompt": "What are the key findings from the patient's last non well-visit consultation note?\n {consultation_rows}"
-    },
-    "immunizations": {
-        "name":  "immunizations",
-        "sql_prompt" : "Retrieve ALL immunizations for the patient {patient_details}.", 
-        "prompt": "Summarize the patient's immunizations:\n {immunizations_rows}"
-    },
-    "allergies": {
-        "name":  "allergies",
-        "sql_prompt": "In a single query retrieve ALL noted allergies or adverse reactions information for the patient {patient_details}.",
-        "prompt": "Highlight any noted allergies or adverse reactions documented in the patient's records.\n {allergies_rows}"
-    },
-}
-#    "history": "Summarize the patient's medical history relevant to their current condition.",
-#    "chronic_conditions": "Highlight any chronic conditions and their management plans documented in the patient's history.",
-#    "procedures": "Summarize the patient's relevant procedures and surgeries.",
 
 # %%
 def initialize_database():
@@ -151,7 +114,7 @@ if __name__ == "__main__":
 
     note_summarizer = Summarizer(db_path=DB_PATH, json_schema_client=json_schema_medical)
 
-    for key, template in PATIENT_TEMPLATES.items():
+    for key, template in patient_templates.items():
         try:
             print("=====================================")
             print(f"{key}")
