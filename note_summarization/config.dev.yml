@@ -1,0 +1,16 @@
+app:
+  name: "Notes Summarization Microservice"
+  version: "1.0.0"
+  host: "127.0.0.1"
+  port: 8000
+
+database:
+  path: "./healthcare_data.db"
+  data_dir: "./data"
+
+openai:
+  api_key: "your_openai_api_key_here"
+
+logging:
+  level: "INFO"
+  file: "./logs/app.log"
