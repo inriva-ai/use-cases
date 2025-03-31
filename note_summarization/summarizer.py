@@ -14,6 +14,9 @@ import sqlite3
 import getpass
 import json
 
+from sqlalchemy import create_engine, text
+# from sqlalchemy.pool import NullPool
+
 # imports needed for SQLiteChain class
 from typing import Any, Dict
 from pydantic import Field
@@ -47,9 +50,9 @@ class SQLiteChain:
     """
     llm: BaseLanguageModel
     """LLM for SQL generation."""
-    database: SQLDatabase = Field(exclude=True)
+    db: SQLDatabase = Field(exclude=True)
     """SQL Database to connect to."""
-    system_prompt: str = "query" #: :meta private:
+    system_prompt: PromptTemplate
     """System prompt for the LLM."""
 
     def __init__(self, llm, db):
@@ -138,12 +141,22 @@ class Summarizer:
         # Close the SQLite database connection
         if self.conn:
             self.conn.close()
-
+ 
     def _initialize_db_connection(self):
         """Initialize the SQLite database connection and LangChain SQLDatabase."""
-        self.conn = sqlite3.connect(self.db_path)
+        # NullPool poolclass could be used in sqlalchemy.create_engine() call  to enable database object complete clean-up
+        #self.db = SQLDatabase.from_uri(f"sqlite:///{self.db_path}", engine_args = {"poolclass": NullPool})
         self.db = SQLDatabase.from_uri(f"sqlite:///{self.db_path}")
+        # self.conn = sqlite3.connect(self.db_path)
 
+        # Create an SQLite engine with a connection pool
+        self.conn = create_engine(
+            f"sqlite:///{self.db_path}",
+            pool_size=5,
+            max_overflow=10,
+            connect_args={"check_same_thread": False}
+        )
+      
     def _initialize_llm_models(self):
         """Initialize the OpenAI model."""
         json_schema_sql = {
@@ -172,9 +185,14 @@ class Summarizer:
 
     def execute_query(self, query):
         """Execute SQL query on SQLite database and fetch results."""
-        cursor = self.conn.cursor()
-        cursor.execute(query)
-        rows = cursor.fetchall()
+        # cursor = self.conn.cursor()
+        # cursor.execute(query)
+        # rows = cursor.fetchall()
+        # conn = self.db._engine.connect()
+        # cursor = conn.cursor()
+        # rows = conn.execute(text(query)).all()
+        rows = self.db.run(query)
+        #conn.close()
         return rows
 
     def format_data(self, prompt, data):

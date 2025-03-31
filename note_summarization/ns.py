@@ -54,9 +54,9 @@ DATA_DIR = "./data"  # Directory with your CSVs
 DB_PATH = "./healthcare_data.db"  # Path to your SQLite database
 
 # %%
-def initialize_database():
+def initialize_database(db_path, data_dir):
     """Initialize the SQLite database and import CSV files."""
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(db_path)
     csv_files = [
         'allergies.csv', 'careplans.csv', 'claims.csv', 'claims_transactions.csv', 'conditions.csv',
         'devices.csv', 'encounters.csv', 'imaging_studies.csv', 'immunizations.csv', 'medications.csv',
@@ -65,7 +65,7 @@ def initialize_database():
     ]
     for file in csv_files:
         table_name = file.split('.')[0]
-        file_path = f'{DATA_DIR}/{file}'
+        file_path = f'{data_dir}/{file}'
         df = pd.read_csv(file_path)
         df.to_sql(table_name, conn, if_exists='replace', index=False)
     conn.close()
@@ -82,8 +82,10 @@ def setup_openai_api_key():
     # if not os.getenv("OPENAI_API_KEY"):
     #     os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter your OpenAI API key: ")
   
-def generate_patient_summary(note_summarizer, template, first_name, last_name):
+def generate_patient_summary(note_summarizer, patient_info, template):
     """Generate a patient summary using all templates."""
+    first_name = patient_info["first_name"]
+    last_name = patient_info["last_name"]
     patient_details = f"first name: {first_name} last name: {last_name}"
     system_prompt = f"Patient {patient_details}."
 
@@ -102,7 +104,7 @@ def generate_patient_summary(note_summarizer, template, first_name, last_name):
 # %%
 # Main execution
 if __name__ == "__main__":
-    initialize_database()
+    initialize_database(db_path=DB_PATH, data_dir=DATA_DIR)
     setup_openai_api_key()
    
    # Set up the cache
@@ -112,6 +114,7 @@ if __name__ == "__main__":
     last_name = "Rippin620"
     print(f"\nGenerating summary for {first_name} {last_name}\n")
 
+    patient_info = {"first_name": first_name, "last_name": last_name}
     note_summarizer = Summarizer(db_path=DB_PATH, json_schema_client=json_schema_medical)
 
     for key, template in patient_templates.items():
@@ -121,7 +124,7 @@ if __name__ == "__main__":
             print("=====================================")
             # print(template["sql_prompt"])
             # print(template["prompt"])
-            note_summary = generate_patient_summary(note_summarizer, template, first_name, last_name)
+            note_summary = generate_patient_summary(note_summarizer, patient_info=patient_info, template=template)
             ns_filename = f"./output/note_summary_{key}_{first_name}_{last_name}.json"
             with open(ns_filename, "w") as file:
                 json.dump(note_summary, file, indent=4)
