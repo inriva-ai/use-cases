@@ -149,27 +149,27 @@ patient_templates = {
     "symptoms": {
         "name":  "encounters",
         "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
-        "prompt": "Provide an overview of the patient's reported symptoms and their progression over time:\n {encounters_rows}"
+        "prompt": "Provide an overview of the patient's reported symptoms and their progression over time:\n"
     },
     "physical_exam": {
         "name":  "physical_exam",
         "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
-        "prompt": "What are the key points and key notes/observations from the patient's last physical examination?\n {physical_exam_rows}"
+        "prompt": "What are the key points and key notes/observations from the patient's last physical examination?\n"
     },
     "consultation": {
         "name":  "consultation",
         "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
-        "prompt": "What are the key findings from the patient's last non well-visit consultation note?\n {consultation_rows}"
+        "prompt": "What are the key findings from the patient's last non well-visit consultation note?\n"
     },
     "immunizations": {
         "name":  "immunizations",
         "sql_prompt" : "Retrieve ALL immunizations for the patient {patient_details}.", 
-        "prompt": "Summarize the patient's immunizations:\n {immunizations_rows}"
+        "prompt": "Summarize the patient's immunizations:\n"
     },
     "allergies": {
         "name":  "allergies",
         "sql_prompt": "In a single query retrieve ALL noted allergies or adverse reactions information for the patient {patient_details}.",
-        "prompt": "Highlight any noted allergies or adverse reactions documented in the patient's records.\n {allergies_rows}"
+        "prompt": "Highlight any noted allergies or adverse reactions documented in the patient's records.\n"
     },
 }
 #    "history": "Summarize the patient's medical history relevant to their current condition.",

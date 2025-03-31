@@ -58,19 +58,6 @@ def initialize_database(db_path, data_dir):
     logging.info(f"Database '{db_path}' initialized.")
     return {"message": "Database initialized and CSV files imported."}
 
-# def delete_database(db_path):
-#     """Delete the SQLite database file."""
-#     try:
-#         if os.path.exists(db_path):
-#             os.remove(db_path)
-#             logging.info(f"Database file '{db_path}' deleted successfully.")
-#         else:
-#             logging.info(f"Database file '{db_path}' does not exist.")
-#     except Exception as e:
-#         logging.error(f"Failed to delete database file: {e}")
-#         return {"message": "Failed to Delete database file."}   
-#     return {"message": "Database deleted."}    
-
 def generate_patient_summary(note_summarizer, patient_info, template):
     """Generate a patient summary using all templates."""
 
@@ -81,19 +68,19 @@ def generate_patient_summary(note_summarizer, patient_info, template):
 
     # Format patient details
     sql_prompt = template['sql_prompt'].format(patient_details=patient_details)
-    logging.info(f"SQL Prompt: {sql_prompt}\n") 
-     # print(f"SQL Prompt: {sql_prompt}\n")  # Debugging step
+    # logging.info(f"SQL Prompt: {sql_prompt}\n") 
+    # print(f"SQL Prompt: {sql_prompt}\n")  # Debugging step
 
     query = note_summarizer.generate_sql_query(sql_prompt)
-    logging.info(f"Generated SQL Query: {query}\n")
+    # logging.info(f"Generated SQL Query: {query}\n")
     # print(f"Generated SQL Query: {query}\n")  # Debugging step
     
-    logging.info("Before executing query")
+    # logging.info("Before executing query")
     data = note_summarizer.execute_query(query)
-    logging.info("After executign query")
+    # logging.info("After executign query")
 
     user_prompt = note_summarizer.format_data(template["prompt"], data)
-    logging.info(f"User Prompt: {user_prompt}\n")
+    # logging.info(f"User Prompt: {user_prompt}\n")
     # print(f"User Prompt: {user_prompt}\n")  # Debugging step
     
     summary = note_summarizer.get_summary_from_openai(system_prompt, user_prompt)
@@ -189,7 +176,7 @@ app = NoteSummarizerFastAPI(config_path=CONFIG_PATH, lifespan=lifespan)
 
 @app.get("/")
 def read_root():
-    return {"message": f"Welcome to {app.tilte}!"}
+    return {"message": f"Welcome to {app.title}!"}
 
 @app.get("/ingest")
 def ingest_database():
@@ -206,7 +193,6 @@ def ingest_database():
 #     },
 #     "template_name": "allergies"
 # }
-
 @app.post("/answer")
 def answer_question(request: Dict[str, Any]):
     """Generate a patient summary using the template provided."""

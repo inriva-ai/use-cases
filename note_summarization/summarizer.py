@@ -117,47 +117,36 @@ class SQLiteChain:
 # %%
 # Define Summarizer class
 class Summarizer:
-    def __init__(self, db_path, model_name="gpt-4o", temperature=0, json_schema_client=json_schema_client):
+    def __init__(self, db_path, pool_size=5,  model_name="gpt-4o", temperature=0, json_schema_client=json_schema_client):
         """Constructor for the Summarizer class"""
         self.db_path = db_path
-        self.conn = None
         self.db = None
         self.llm = None
-        self.model_name = model_name
-        self.temperature = temperature
-        self.json_schema_client = json_schema_client
         self.db_chain = None
         self.structured_llm_sql = None
         self.structured_llm_client = None
+        self.json_schema_client = json_schema_client
 
-        self._initialize_db_connection()
-        self._initialize_llm_models()
+        self._initialize_db_connection(pool_size=pool_size)
+        self._initialize_llm_models(model_name=model_name, temperature=temperature)
 
-        if self.conn is None or self.db is None:
+        if self.db is None:
             raise ValueError("Database connection not initialized.")
 
     def __del__(self):
         """Destructor for the Summarizer class'"""
         # Close the SQLite database connection
-        if self.conn:
-            self.conn.close()
+        if self.db:
+            del self.db
  
-    def _initialize_db_connection(self):
+    def _initialize_db_connection(self, pool_size):
         """Initialize the SQLite database connection and LangChain SQLDatabase."""
         # NullPool poolclass could be used in sqlalchemy.create_engine() call  to enable database object complete clean-up
         #self.db = SQLDatabase.from_uri(f"sqlite:///{self.db_path}", engine_args = {"poolclass": NullPool})
-        self.db = SQLDatabase.from_uri(f"sqlite:///{self.db_path}")
+        self.db = SQLDatabase.from_uri(f"sqlite:///{self.db_path}", engine_args = {"pool_size": pool_size})
         # self.conn = sqlite3.connect(self.db_path)
-
-        # Create an SQLite engine with a connection pool
-        self.conn = create_engine(
-            f"sqlite:///{self.db_path}",
-            pool_size=5,
-            max_overflow=10,
-            connect_args={"check_same_thread": False}
-        )
-      
-    def _initialize_llm_models(self):
+              
+    def _initialize_llm_models(self, model_name, temperature):
         """Initialize the OpenAI model."""
         json_schema_sql = {
             "title": "sql_query",
@@ -171,7 +160,7 @@ class Summarizer:
             
             },
         }
-        self.llm = ChatOpenAI(model_name=self.model_name, temperature=self.temperature)
+        self.llm = ChatOpenAI(model_name=model_name, temperature=temperature)
         self.structured_llm_sql = self.llm.with_structured_output(json_schema_sql, method="json_schema")
         self.structured_llm_client = self.llm.with_structured_output(self.json_schema_client, method="json_schema")
         self.db_chain = SQLiteChain(llm=self.structured_llm_sql, db=self.db)
@@ -185,14 +174,9 @@ class Summarizer:
 
     def execute_query(self, query):
         """Execute SQL query on SQLite database and fetch results."""
-        # cursor = self.conn.cursor()
-        # cursor.execute(query)
-        # rows = cursor.fetchall()
-        # conn = self.db._engine.connect()
-        # cursor = conn.cursor()
-        # rows = conn.execute(text(query)).all()
-        rows = self.db.run(query)
-        #conn.close()
+        cursor = self.db.run(command = query, fetch="cursor")
+        rows = cursor.all()
+        cursor.close()
         return rows
 
     def format_data(self, prompt, data):
