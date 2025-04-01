@@ -11,7 +11,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code
-COPY .env main.py summarizer.py json_schemas.py config.dev.yml /app/
+COPY main.py summarizer.py json_schemas.py config.dev.yml /app/
 COPY data/*  /app/data/
 
 # Expose the application port
