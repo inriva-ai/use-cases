@@ -1,4 +1,3 @@
-
 # %% [markdown]
 # This notebook is designed to quickly demo major capabilities of the note summarization module without having to deploy and configure all the relevant components of the solution. The notebook:
 # 1. Installs all necessary dependencies.

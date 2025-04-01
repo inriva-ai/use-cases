@@ -1,21 +1,6 @@
 
 # %%
 from __future__ import annotations
-import warnings
-
-# Install dependencies
-#%pip install -r requirements.txt
-#%conda install --file requirements.txt
-
-# Import required libraries
-import os
-import pandas as pd
-import sqlite3
-import getpass
-import json
-
-from sqlalchemy import create_engine, text
-# from sqlalchemy.pool import NullPool
 
 # imports needed for SQLiteChain class
 from typing import Any, Dict
@@ -141,10 +126,7 @@ class Summarizer:
  
     def _initialize_db_connection(self, pool_size):
         """Initialize the SQLite database connection and LangChain SQLDatabase."""
-        # NullPool poolclass could be used in sqlalchemy.create_engine() call  to enable database object complete clean-up
-        #self.db = SQLDatabase.from_uri(f"sqlite:///{self.db_path}", engine_args = {"poolclass": NullPool})
         self.db = SQLDatabase.from_uri(f"sqlite:///{self.db_path}", engine_args = {"pool_size": pool_size})
-        # self.conn = sqlite3.connect(self.db_path)
               
     def _initialize_llm_models(self, model_name, temperature):
         """Initialize the OpenAI model."""

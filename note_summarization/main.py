@@ -1,9 +1,13 @@
+
+# %%# Install dependencies
+#%pip install -r requirements.txt
+#%conda install --file requirements.txt
+
 # Import required libraries
 import os
 import pandas as pd
 import sqlite3
-import json
-import getpass
+
 from dotenv import load_dotenv
 
 # Imports needed for MemoryCache setup

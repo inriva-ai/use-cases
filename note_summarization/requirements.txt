@@ -1,6 +1,11 @@
 pandas==2.2.3
 sqlite-utils==3.38
 openai==1.66.3
+langchain==0.3.20
+langchain_core==0.3.45
 langchain-community==0.3.19
 langchain-experimental==0.3.4
 langchain-openai==0.3.8
+pyyaml==6.0.2
+fastapi[standard]==0.115.12
+uvicorn[standard]==0.34.0
