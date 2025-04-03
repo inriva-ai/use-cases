@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 # imports needed for SQLiteChain class
-from typing import Any, Dict
+from typing import Any
 from pydantic import Field
 from langchain_core.language_models import BaseLanguageModel
 from langchain.prompts.prompt import PromptTemplate
@@ -16,7 +16,8 @@ from langchain_openai import ChatOpenAI
 from langchain.schema import SystemMessage, HumanMessage
 
 # Schemas for LLM structured output
-from json_schemas import json_schema_client
+from core.json_schemas import json_schema_client
+from sqlalchemy import text
 
 # %%
 # Define SQLiteChain class
@@ -40,7 +41,7 @@ class SQLiteChain:
     system_prompt: PromptTemplate
     """System prompt for the LLM."""
 
-    def __init__(self, llm, db):
+    def __init__(self, llm: BaseLanguageModel, db: SQLDatabase):
         """
         Initialize the SQLiteChain with the required components.
         
@@ -50,10 +51,9 @@ class SQLiteChain:
         """
         self.llm = llm
         self.db = db
-        self.system_prompt = None
-        self._initialize_prompt()
-
-    def _initialize_prompt(self):
+        self.system_prompt = self._initialize_prompt()
+      
+    def _initialize_prompt(self) -> PromptTemplate:
         """Create a custom prompt template for structured output."""
 
         sqlite_prompt = """You are a SQLite expert. Given an input question, create a syntactically correct SQLite query to run. 
@@ -71,12 +71,13 @@ class SQLiteChain:
 
         Question: {input}
         """
-        self.system_prompt = PromptTemplate(
+        system_prompt = PromptTemplate(
             input_variables=["input", "table_info"],
             template=sqlite_prompt
         )
+        return system_prompt
 
-    def invoke(self, prompt)-> Dict[str, Any]:
+    def invoke(self, prompt: str) -> dict[str, Any]:
         """
         Generate SQL query from a natural language prompt.
         
@@ -102,33 +103,32 @@ class SQLiteChain:
 # %%
 # Define Summarizer class
 class Summarizer:
-    def __init__(self, db_path, pool_size=5,  model_name="gpt-4o", temperature=0, json_schema_client=json_schema_client):
+    def __init__(self, db_path: StopIteration, pool_size: int=5,  model_name: str="gpt-4o", temperature: int=0, json_schema_client: dict[str, Any]=json_schema_client):
         """Constructor for the Summarizer class"""
-        self.db_path = db_path
-        self.db = None
+
+        self.db = self._initialize_db_connection(db_path=db_path, pool_size=pool_size)
+        if self.db is None:
+            raise ValueError("Database connection not initialized.")
+        
         self.llm = None
         self.db_chain = None
         self.structured_llm_sql = None
         self.structured_llm_client = None
-        self.json_schema_client = json_schema_client
+        self._initialize_llm_models(model_name=model_name, temperature=temperature, json_schema_client=json_schema_client)
+        
+    def dispose(self):
+        """Dispose of the SQLite database connection."""
+        # Dispose of the engine to free up resources
+        # FIXME: This is a temporary fix to avoid "AttributeError: 'SQLDatabase' object has no attribute '_engine'" error        
+        if hasattr(self.db, "_engine"):
+            self.db._engine.dispose()
 
-        self._initialize_db_connection(pool_size=pool_size)
-        self._initialize_llm_models(model_name=model_name, temperature=temperature)
-
-        if self.db is None:
-            raise ValueError("Database connection not initialized.")
-
-    def __del__(self):
-        """Destructor for the Summarizer class'"""
-        # Close the SQLite database connection
-        if self.db:
-            del self.db
- 
-    def _initialize_db_connection(self, pool_size):
+    def _initialize_db_connection(self, db_path: str, pool_size: int) -> SQLDatabase:
         """Initialize the SQLite database connection and LangChain SQLDatabase."""
-        self.db = SQLDatabase.from_uri(f"sqlite:///{self.db_path}", engine_args = {"pool_size": pool_size})
+        db = SQLDatabase.from_uri(f"sqlite:///{db_path}", engine_args = {"pool_size": pool_size})
+        return db
               
-    def _initialize_llm_models(self, model_name, temperature):
+    def _initialize_llm_models(self, model_name: str, temperature: int, json_schema_client: dict[str, Any]) -> None:
         """Initialize the OpenAI model."""
         json_schema_sql = {
             "title": "sql_query",
@@ -144,24 +144,24 @@ class Summarizer:
         }
         self.llm = ChatOpenAI(model_name=model_name, temperature=temperature)
         self.structured_llm_sql = self.llm.with_structured_output(json_schema_sql, method="json_schema")
-        self.structured_llm_client = self.llm.with_structured_output(self.json_schema_client, method="json_schema")
+        self.structured_llm_client = self.llm.with_structured_output(json_schema_client, method="json_schema")
         self.db_chain = SQLiteChain(llm=self.structured_llm_sql, db=self.db)
     
-    def generate_sql_query(self, prompt):
+    def generate_sql_query(self, prompt: str) -> str:
         """Generate SQL query"""
         response = self.db_chain.invoke(prompt)
         sql_query = response['sql']
         # print(f"Generated SQL query: {sql_query}")  # Debugging step
         return sql_query
 
-    def execute_query(self, query):
+    def execute_query(self, query: str) -> Any:
         """Execute SQL query on SQLite database and fetch results."""
         cursor = self.db.run(command = query, fetch="cursor")
         rows = cursor.all()
         cursor.close()
         return rows
 
-    def format_data(self, prompt, data):
+    def format_data(self, prompt, data) -> str:
         """Format extracted data into the prompt."""
         formatted_rows = "\n".join([", ".join(map(str, row)) for row in data])
         return f"{prompt} {formatted_rows}"

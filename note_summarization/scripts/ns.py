@@ -33,72 +33,23 @@
 
 
 # Import required libraries
-import os
-import pandas as pd
-import sqlite3
 import json
-import getpass
-from dotenv import load_dotenv
+import logging
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 # Imports needed for MemoryCache setup
 from langchain.globals import set_llm_cache
 from langchain_community.cache import InMemoryCache
 
-# Imports from custom libraries
-from summarizer import Summarizer
-from json_schemas import json_schema_client,  json_schema_medical, patient_templates
+## Imports from custom libraries
+from core.config import ROOT_DIR, setup_openai_api_key
+from core.summarizer import Summarizer
+from core.json_schemas import json_schema_client,  json_schema_medical, patient_templates
+from core.ns_utils import initialize_database, delete_database, generate_patient_summary
 
 # Define constants
-DATA_DIR = "./data"  # Directory with your CSVs
-DB_PATH = "./healthcare_data.db"  # Path to your SQLite database
-
-# %%
-def initialize_database(db_path, data_dir):
-    """Initialize the SQLite database and import CSV files."""
-    conn = sqlite3.connect(db_path)
-    csv_files = [
-        'allergies.csv', 'careplans.csv', 'claims.csv', 'claims_transactions.csv', 'conditions.csv',
-        'devices.csv', 'encounters.csv', 'imaging_studies.csv', 'immunizations.csv', 'medications.csv',
-        'observations.csv', 'organizations.csv', 'patients.csv', 'payer_transitions.csv', 'payers.csv',
-        'procedures.csv', 'providers.csv', 'supplies.csv'
-    ]
-    for file in csv_files:
-        table_name = file.split('.')[0]
-        file_path = f'{data_dir}/{file}'
-        df = pd.read_csv(file_path)
-        df.to_sql(table_name, conn, if_exists='replace', index=False)
-    conn.close()
-    
-def setup_openai_api_key():
-    """Set up the OpenAI API key."""
-    load_dotenv()
-    # Retrieve the API key from the environment
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        raise ValueError("OpenAI API key not found. Please set it in the .env file.")
-    os.environ["OPENAI_API_KEY"] = api_key
-
-    # if not os.getenv("OPENAI_API_KEY"):
-    #     os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter your OpenAI API key: ")
-  
-def generate_patient_summary(note_summarizer, patient_info, template):
-    """Generate a patient summary using all templates."""
-    first_name = patient_info["first_name"]
-    last_name = patient_info["last_name"]
-    patient_details = f"first name: {first_name} last name: {last_name}"
-    system_prompt = f"Patient {patient_details}."
-
-    # Format patient details
-    sql_prompt = template['sql_prompt'].format(patient_details=patient_details)
-    # print(f"SQL Prompt: {sql_prompt}\n")  # Debugging step
-    query = note_summarizer.generate_sql_query(sql_prompt)
-    # print(f"Generated SQL Query: {query}\n")  # Debugging step
-    data = note_summarizer.execute_query(query)
-    user_prompt = note_summarizer.format_data(template["prompt"], data)
-    # print(f"User Prompt: {user_prompt}\n")  # Debugging step
-    summary = note_summarizer.get_summary_from_openai(system_prompt, user_prompt)
-
-    return summary
+DATA_DIR = ROOT_DIR / "data"  # Directory with your CSVs
+DB_PATH = ROOT_DIR / "db/healthcare_data.db"  # Path to your SQLite database
 
 # %%
 # Main execution
@@ -129,4 +80,4 @@ if __name__ == "__main__":
                 json.dump(note_summary, file, indent=4)
         except Exception as e:
             print(f"Error: {e}")
-    del note_summarizer
+    delete_database(db_path=DB_PATH)        
