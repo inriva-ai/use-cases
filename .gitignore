@@ -172,7 +172,6 @@ cython_debug/
 
 
 .vscode/
-.dockerignore
 *.zip
 *.db
 db/

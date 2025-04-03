@@ -1,0 +1,12 @@
+**/__pycache__/
+**/*.pyc
+*.log
+.vscode/
+.git/
+notebooks/
+scripts/
+logs/
+output/
+db/
+*.zip
+.env
