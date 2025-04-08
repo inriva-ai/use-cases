@@ -7,6 +7,7 @@ app:
 database:
   path: "db/healthcare_data.db"
   data_dir: "data"
+  delete_db: True
 
 openai:
   api_key: "your_openai_api_key_here"
