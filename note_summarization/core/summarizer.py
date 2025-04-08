@@ -61,7 +61,13 @@ class SQLiteChain:
         Never query for all columns from a table. You must query only the columns that are needed to answer the question. 
         For each question, assume you know NOTHING except the schema provided.
         Use only the information explicitly provided in the input question and schema. Do not make any assumptions. Do not use any memorized or cached data.
-        Use JOINs when data from multiple tables are required, ensuring that relationships between tables are explicitly defined. Always define explicit ON conditions for JOINs to prevent Cartesian products.
+        Assume all input values are exactly as they are provided, and treat them as distinct and unique unless explicitly stated otherwise.
+        Ensure that all comparisons use strict equality and do not rely on partial matches, similarity, or assumptions.
+        Each character in input values is HIGHLY SIGNIFICANT and SHOULD be concidered.
+        Do not interpret or infer relationships between input values unless explicitly defined in the schema or question. 
+        Do not perform any transformations, approximations, or interpretations of input values.
+        Treat all input values as independent and unrelated unless explicitly stated otherwise.
+        Do not use any external knowledge or information. Do not use any external APIs or services. Do not use any external libraries or packages. Do not use any external files or resources.
         Wrap each column name in double quotes (") to denote them as delimited identifiers.
         Pay attention to use only the column names you can see in the tables provided. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table.
         Pay attention to use date('now') function to get the current date, if the question involves "today".
@@ -142,9 +148,11 @@ class Summarizer:
             
             },
         }
+        # FIXME: using method="json_schema" would require additional compliance with OpenAI specifications:
+        # https://platform.openai.com/docs/guides/structured-outputs/supported-schemas?api-mode=chat
         self.llm = ChatOpenAI(model_name=model_name, temperature=temperature)
-        self.structured_llm_sql = self.llm.with_structured_output(json_schema_sql, method="json_schema")
-        self.structured_llm_client = self.llm.with_structured_output(json_schema_client, method="json_schema")
+        self.structured_llm_sql = self.llm.with_structured_output(json_schema_sql)#, method="json_schema")
+        self.structured_llm_client = self.llm.with_structured_output(json_schema_client)#, method="json_schema")
         self.db_chain = SQLiteChain(llm=self.structured_llm_sql, db=self.db)
     
     def generate_sql_query(self, prompt: str) -> str:
@@ -164,7 +172,7 @@ class Summarizer:
     def format_data(self, prompt, data) -> str:
         """Format extracted data into the prompt."""
         formatted_rows = "\n".join([", ".join(map(str, row)) for row in data])
-        return f"{prompt} {formatted_rows}"
+        return f"{prompt}{formatted_rows}"
 
     def get_summary_from_openai(self, system_prompt, user_prompt):
         """Send prompt to OpenAI model and get a response."""
