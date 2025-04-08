@@ -1,4 +1,3 @@
-
 # %%# Install dependencies
 #%pip install -r requirements.txt
 #%conda install --file requirements.txt
@@ -18,9 +17,11 @@ from core.json_schemas import json_schema_client,  json_schema_medical, patient_
 from  core.ns_utils import initialize_database, delete_database, generate_patient_summary
 
 # Imports for FastAPI
-from contextlib import asynccontextmanager
-from fastapi import FastAPI
 import yaml
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
 # Imports for logging
 import logging
@@ -84,7 +85,7 @@ class NoteSummarizerFastAPI(FastAPI):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    try :
+    try:
         # Set up the OpenAI API key
         setup_openai_api_key()
 
@@ -106,12 +107,15 @@ async def lifespan(app: FastAPI):
         if hasattr(app.state, "note_summarizer"):
             app.state.note_summarizer.dispose()
             logging.info("note_summarizer cleaned up.")
-        delete_database(app.db_path)
+        if app.config.get("database", {}).get("delete_db", False):
+            delete_database(app.db_path)
         logging.info("Closing FastAPI app.")
   
 # Initialize the FastAPI app with lifespan
 # This function will run when the app starts and stops
 app = NoteSummarizerFastAPI(config_path=CONFIG_PATH, lifespan=lifespan)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 @app.get("/")
 def read_root():
@@ -122,8 +126,13 @@ def ingest_database():
     """Endpoint to initialize the database."""
     return initialize_database(db_path=app.db_path, data_dir=app.data_dir)
 
-# API endpoint to generate a patient summary
+@app.get("/templates")
+def get_templates():
+    """Endpoint to retrieve available templates."""
+    return {"templates": list(patient_templates.keys())}
 
+
+# API endpoint to generate a patient summary
 # Request format
 # request = {
 #     "patient_info": {
@@ -132,24 +141,41 @@ def ingest_database():
 #     },
 #     "template_name": "allergies"
 # }
-@app.post("/answer")
-def answer_question(request: dict[str, Any]):
+@app.get("/answer", response_class=HTMLResponse)
+async def get_form(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request, "response": None})
+
+
+@app.post("/answer", response_class=HTMLResponse)
+async def answer_question(request: Request):
     """Generate a patient summary using the template provided."""
     
-    logging.info(f"Request: {request}")
+    data = await request.json()
+    logging.info(f"Request received: {data}")
 
     # Extract data from the request
-    patient_info = request["patient_info"]
-    template_name = request["template_name"]
+    patient_info = data.get("patient_info", {})
+    template_name = data.get("template_name", "")
+
+    # Validate patient_info fields
+    if not patient_info.get("first_name") or not patient_info.get("last_name"):
+        response = {"error": "Invalid patient_info: Missing first_name or last_name."}
+        logging.error("Invalid patient_info: Missing first_name or last_name.")
+        return templates.TemplateResponse("_output.html", {"request": request, "response": response})
 
     # Check if the template exists
     if template_name not in patient_templates:
-        return {"error": f"Template '{template_name}' does not exist."}
+        response = {"error": f"Template '{template_name}' does not exist."}
+        logging.error(f"Template '{template_name}' does not exist.")
+        return templates.TemplateResponse("_output.html", {"request": request, "response": response})
+    
     template = patient_templates[template_name]
-
     try:
-        note_summary = generate_patient_summary(app.state.note_summarizer, patient_info=patient_info, template=template)
+        response = generate_patient_summary(app.state.note_summarizer, patient_info=patient_info, template=template)
+        logging.info(f"Summary generated successfully for template: {template_name}")
     except Exception as e:
-        return {"error": str(e)}    
-      
-    return note_summary
+        response = {"error": str(e)}
+        logging.error(f"Error generating summary for patient {patient_info}: {e}")
+        
+    # Render only the output section of the template
+    return templates.TemplateResponse("_output.html", {"request": request, "response": response})
