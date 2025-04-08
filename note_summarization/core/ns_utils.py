@@ -40,22 +40,24 @@ def generate_patient_summary(note_summarizer: Summarizer, patient_info: dict[str
     """Generate a patient summary using all templates."""
     first_name = patient_info["first_name"]
     last_name = patient_info["last_name"]
-    patient_details = f"first name: {first_name} last name: {last_name}"
-    system_prompt = f"Patient {patient_details}."
+    patient_details = f"first name: '{first_name}' last name: '{last_name}'"
+    system_prompt = f"Patient first name: {first_name} last name: {last_name}."
 
     # Format patient details
     sql_prompt = template['sql_prompt'].format(patient_details=patient_details)
-    # logging.info(f"SQL Prompt: {sql_prompt}\n") 
+    logging.info(f"SQL Prompt: {sql_prompt}") 
     
     query = note_summarizer.generate_sql_query(sql_prompt)
-    # logging.info(f"Generated SQL Query: {query}\n")
+    logging.info(f"Generated SQL Query: {query}\n")
        
     # logging.info("Before executing query")
     data = note_summarizer.execute_query(query)
-    # logging.info("After executign query")
+    logging.info(f"After executing query: {len(data)} rows returned")
+    if len(data) == 0:
+        raise ValueError(f"No data found for {patient_details}")
 
     user_prompt = note_summarizer.format_data(template["prompt"], data)
-    # logging.info(f"User Prompt: {user_prompt}\n")
+    #logging.info(f"User Prompt: {user_prompt}")
      
     summary = note_summarizer.get_summary_from_openai(system_prompt, user_prompt)
 
