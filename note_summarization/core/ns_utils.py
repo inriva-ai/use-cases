@@ -40,7 +40,7 @@ def generate_patient_summary(note_summarizer: Summarizer, patient_info: dict[str
     """Generate a patient summary using all templates."""
     first_name = patient_info["first_name"]
     last_name = patient_info["last_name"]
-    patient_details = f"first name: '{first_name}' last name: '{last_name}'"
+    patient_details = f"first name is exactly '{first_name}' last name is exactly '{last_name}'"
     system_prompt = f"Patient first name: {first_name} last name: {last_name}."
 
     # Format patient details
@@ -54,7 +54,7 @@ def generate_patient_summary(note_summarizer: Summarizer, patient_info: dict[str
     data = note_summarizer.execute_query(query)
     logging.info(f"After executing query: {len(data)} rows returned")
     if len(data) == 0:
-        raise ValueError(f"No data found for {patient_details}")
+        raise ValueError(f"No data found for {system_prompt}")
 
     user_prompt = note_summarizer.format_data(template["prompt"], data)
     #logging.info(f"User Prompt: {user_prompt}")

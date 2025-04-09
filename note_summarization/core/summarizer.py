@@ -63,7 +63,8 @@ class SQLiteChain:
         Use only the information explicitly provided in the input question and schema. Do not make any assumptions. Do not use any memorized or cached data.
         Assume all input values are exactly as they are provided, and treat them as distinct and unique unless explicitly stated otherwise.
         Ensure that all comparisons use strict equality and do not rely on partial matches, similarity, or assumptions.
-        Each character in input values is HIGHLY SIGNIFICANT and SHOULD be concidered.
+        Every character (including letters, numbers, and special characteres) in every input value is CRITICAL and and must be considered exactly as provided.
+        Do not make any assumptions about misspellings, typos, or variations in input values.
         Do not interpret or infer relationships between input values unless explicitly defined in the schema or question. 
         Do not perform any transformations, approximations, or interpretations of input values.
         Treat all input values as independent and unrelated unless explicitly stated otherwise.
