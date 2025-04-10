@@ -4,7 +4,7 @@
 
 # Import required libraries
 import os
-from typing import Any
+from pydantic import BaseModel
 
 # Imports needed for MemoryCache setup
 from langchain.globals import set_llm_cache
@@ -13,14 +13,14 @@ from langchain_community.cache import InMemoryCache
 # Imports from custom libraries
 from core.config import ROOT_DIR, setup_openai_api_key
 from core.summarizer import Summarizer
-from core.json_schemas import json_schema_client,  json_schema_medical, patient_templates
+from core.json_schemas import  patient_templates
 from  core.ns_utils import initialize_database, delete_database, generate_patient_summary
 
 # Imports for FastAPI
 import yaml
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request, Query, Body
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
 # Imports for logging
@@ -141,16 +141,24 @@ def get_templates():
 #     },
 #     "template_name": "allergies"
 # }
+
 @app.get("/answer", response_class=HTMLResponse)
 async def get_form(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "response": None})
 
 
-@app.post("/answer", response_class=HTMLResponse)
-async def answer_question(request: Request):
+class RequestBody(BaseModel):
+    patient_info: dict
+    template_name: str
+
+@app.post("/answer")
+async def answer_question(
+    request_body: RequestBody = Body(..., description="Request body containing patient info and template name"),
+    response_type: str = Query("html", description="Response type: 'html' or 'json'")
+):
     """Generate a patient summary using the template provided."""
     
-    data = await request.json()
+    data = request_body.model_dump()
     logging.info(f"Request received: {data}")
 
     # Extract data from the request
@@ -161,13 +169,13 @@ async def answer_question(request: Request):
     if not patient_info.get("first_name") or not patient_info.get("last_name"):
         response = {"error": "Invalid patient_info: Missing first_name or last_name."}
         logging.error("Invalid patient_info: Missing first_name or last_name.")
-        return templates.TemplateResponse("_output.html", {"request": request, "response": response})
+        return _generate_response(data, response, response_type)
 
     # Check if the template exists
     if template_name not in patient_templates:
         response = {"error": f"Template '{template_name}' does not exist."}
         logging.error(f"Template '{template_name}' does not exist.")
-        return templates.TemplateResponse("_output.html", {"request": request, "response": response})
+        return _generate_response(data, response, response_type)
     
     template = patient_templates[template_name]
     try:
@@ -178,4 +186,10 @@ async def answer_question(request: Request):
         logging.error(f"Error generating summary for patient {patient_info}: {e}")
         
     # Render only the output section of the template
-    return templates.TemplateResponse("_output.html", {"request": request, "response": response})
+    return _generate_response(data, response, response_type)
+
+def _generate_response(request: Request, response: dict, response_type: str):
+    """Helper function to generate the appropriate response based on response_type."""
+    if response_type == "html":
+        return templates.TemplateResponse("_output.html", {"request": request, "response": response})
+    return JSONResponse(content=response)
