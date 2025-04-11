@@ -1,0 +1,28 @@
+{% if response.error %}
+    <h3 style="color: red;">Error:</h3>
+    <p>{{ response.error }}</p>
+{% else %}
+    <hr>
+    <h3>Patient Note Summary:</h3>
+    <div>
+        {% macro render(data) %}
+            {% if data is mapping %}
+                <ul>
+                    {% for key, value in data.items() %}
+                        <li><strong>{{ key }}:</strong> {{ render(value) }}</li>
+                    {% endfor %}
+                </ul>
+            {% elif data is iterable and data is not string %}
+                <ul>
+                    {% for item in data %}
+                        <li>{{ render(item) }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                {{ data }}
+            {% endif %}
+        {% endmacro %}
+
+        {{ render(response) }}
+    </div>
+{% endif %}

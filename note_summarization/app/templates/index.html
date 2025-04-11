@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prompt Form</title>
+</head>
+<body>
+    <h2>Patient Info Form</h2>
+    <form id="prompt-form">
+        <label>First Name:</label><br>
+        <input type="text" placeholder="Lupe126" id="first-name" aria-label="First Name"><br><br>
+
+        <label>Last Name:</label><br>
+        <input type="text" placeholder="Rippin620" id="last-name" aria-label="Last Name"><br><br>
+
+        <label>Template:</label><br>
+        <select id="template-name" aria-label="Template Name"></select><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <div id="output">
+        {% include "_output.html" %}
+    </div>
+    
+    <script>
+        const form = document.getElementById("prompt-form");
+        const templateSelect = document.getElementById("template-name");
+        const outputDiv = document.getElementById("output");
+
+        // Fetch templates dynamically
+        async function fetchTemplates() {
+            try {
+                const res = await fetch("/templates");
+                if (!res.ok) throw new Error("Failed to fetch templates.");
+                const data = await res.json();
+                templateSelect.innerHTML = `<option value="" disabled selected>--select template--</option>` +
+                    data.templates
+                    .map(template => `<option value="${template}">${template}</option>`)
+                    .join("");
+            } catch (error) {
+                alert(`${error}`);
+            }
+        }
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            // Show "Processing..." message in the output div
+            outputDiv.innerHTML = "<p>Processing...</p>";
+
+            const payload = {
+                patient_info: {
+                    first_name: document.getElementById("first-name").value.trim(),
+                    last_name: document.getElementById("last-name").value.trim()
+                },
+                template_name: templateSelect.value
+            };
+
+            try {
+                const res = await fetch("/answer", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) throw new Error("Failed to generate summary.");
+                const html = await res.text();
+                outputDiv.innerHTML = html; // Update the #output div with the server-rendered response
+            } catch (error) {
+                outputDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        });
+
+        // Initialize templates on page load
+        fetchTemplates();
+    </script>
+</body>
+</html>
