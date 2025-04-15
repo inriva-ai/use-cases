@@ -11,7 +11,7 @@ from langchain.globals import set_llm_cache
 from langchain_community.cache import InMemoryCache
 
 # Imports from custom libraries
-from core.config import ROOT_DIR, setup_openai_api_key
+from core.config import ROOT_DIR, Config
 from core.summarizer import Summarizer
 from core.json_schemas import  patient_templates
 from  core.ns_utils import initialize_database, delete_database, generate_patient_summary
@@ -27,6 +27,11 @@ from fastapi.templating import Jinja2Templates
 import logging
 from logging.handlers import RotatingFileHandler
 
+# For Endpoint error handling
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from fastapi import Request, status
+
 # Define constants
 CONFIG_PATH = ROOT_DIR / "config/config.dev.yml"
 
@@ -36,24 +41,21 @@ class NoteSummarizerFastAPI(FastAPI):
         # Initialize the parent FastAPI class
         super().__init__(*args, **kwargs)
 
-        # Load configuration
-        self.config = self._load_config(config_path)
+        # Initialize configuration
+        Config.from_config_file(config_path)
+        self.config = Config.get()
 
         # Set up logging
         self._setup_logging()
 
-        # Define app attributes
-        self.title= self.config.get("app", {}).get("name", "Note Summarizer")
-        self.version = self.config.get("app", {}).get("version", "1.0.0")
-        self.db_path = ROOT_DIR / self.config.get("database", {}).get("path", "db/database.db")
-        self.data_dir = ROOT_DIR / self.config.get("database", {}).get("data_dir", "data")
+        # Populate configuration settings
+        self.title= self.config["app"]["name"]
+        self.version = self.config["app"]["version"]
+        self.db_path = ROOT_DIR / self.config["database"]["path"]
+        self.data_dir = ROOT_DIR / self.config["database"]["data_dir"]
+
+        os.environ["OPENAI_API_KEY"] = self.config["openai"]["api_key"]
  
-    def _load_config(self, config_path: str):
-        """Load configuration from a YAML file."""
-        if not os.path.exists(config_path):
-            raise FileNotFoundError(f"Configuration file not found: {config_path}")
-        with open(config_path, "r") as file:
-            return yaml.safe_load(file)
 
     def _setup_logging(self):
         """Set up logging based on the configuration."""
@@ -86,30 +88,20 @@ class NoteSummarizerFastAPI(FastAPI):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
-        # Set up the OpenAI API key
-        setup_openai_api_key()
-
         # Set up the cache
         set_llm_cache(InMemoryCache())
         
         # Initialize the database
-        initialize_database(db_path=app.db_path, data_dir=app.data_dir)
+        if not os.path.exists(app.db_path):
+            initialize_database(db_path=app.db_path, data_dir=app.data_dir)
            
         # Initialize the Summarizer
         app.state.note_summarizer = Summarizer(db_path=app.db_path)
         logging.info("Summarizer initialized successfully.")
 
-        yield
     except Exception as e:
         logging.error(f"Error during app initialization: {e}")
-    finally:
-        # Delete the database and clean up resources
-        if hasattr(app.state, "note_summarizer"):
-            app.state.note_summarizer.dispose()
-            logging.info("note_summarizer cleaned up.")
-        if app.config.get("database", {}).get("delete_db", False):
-            delete_database(app.db_path)
-        logging.info("Closing FastAPI app.")
+    yield
   
 # Initialize the FastAPI app with lifespan
 # This function will run when the app starts and stops
@@ -153,9 +145,9 @@ class RequestBody(BaseModel):
 
 @app.post("/answer")
 async def answer_question(
-    request_body: RequestBody = Body(..., description="Request body containing patient info and template name"),
-    response_type: str = Query("html", description="Response type: 'html' or 'json'")
-):
+        request_body: RequestBody = Body(..., description="Request body containing patient info and template name"),
+        response_type: str = Query("html", description="Response type: 'html' or 'json'")
+    ):
     """Generate a patient summary using the template provided."""
     
     data = request_body.model_dump()
@@ -193,3 +185,18 @@ def _generate_response(request: Request, response: dict, response_type: str):
     if response_type == "html":
         return templates.TemplateResponse("_output.html", {"request": request, "response": response})
     return JSONResponse(content=response)
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    body = await request.body()  # Raw request body (bytes)
+    print("🚨 Validation error:")
+    print("Request body:", body.decode("utf-8"))
+    print("Validation issues:", exc.errors())
+    
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={
+            "detail": exc.errors(),
+            "body": body.decode("utf-8")
+        }
+    )
