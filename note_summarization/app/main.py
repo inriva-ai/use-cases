@@ -14,7 +14,8 @@ from langchain_community.cache import InMemoryCache
 from core.config import ROOT_DIR, Config, setup_openai_api_key
 
 from core.summarizer import Summarizer
-from core.json_schemas import  patient_templates
+#from core.json_schemas import  patient_templates
+from core.template_library import patient_templates, prompt_templates, sql_templates, output_schemas
 from  core.ns_utils import initialize_database, delete_database, generate_patient_summary
 
 # Imports for FastAPI
@@ -133,7 +134,7 @@ def ingest_database():
 @app.get("/templates")
 def get_templates():
     """Endpoint to retrieve available templates."""
-    return {"templates": list(patient_templates.keys())}
+    return {"templates": [(key, value["name"]) for key, value in patient_templates.items()]}
 
 
 # API endpoint to generate a patient summary
@@ -181,7 +182,7 @@ async def answer_question(
         logging.error(f"Template '{template_name}' does not exist.")
         return _generate_response(data, response, response_type)
     
-    template = patient_templates[template_name]
+    template = _populate_tempalate(patient_templates[template_name])
     try:
         response = generate_patient_summary(app.state.note_summarizer, patient_info=patient_info, template=template)
         logging.info(f"Summary generated successfully for template: {template_name}")
@@ -190,12 +191,30 @@ async def answer_question(
         logging.error(f"Error generating summary for patient {patient_info}: {e}")
         
     # Render only the output section of the template
-    return _generate_response(data, response, response_type)
+    return _generate_response(data, response, response_type, template["user_output"])
 
-def _generate_response(request: Request, response: dict, response_type: str):
+def _populate_tempalate(template:dict)-> dict:
+    """Format the template to be used to answer the question. Specificalliy, it will replace the prompt, sql_templates and output_schema with the actual templates:
+    {
+        "prompt",
+        "sql_prompts": [],
+        "output_schema",
+        "user_output"
+    }    
+    """   
+    populated_template = template.copy()
+    populated_template["prompt"] = prompt_templates[template["prompt"]]
+    populated_template["output_schema"] = output_schemas[template["output_schema"]]
+    sql_prompts = template.get("sql_prompts", [])
+    populated_template["sql_prompts"] = []
+    for sql_prompt in sql_prompts:
+        populated_template["sql_prompts"].append(sql_templates[sql_prompt])
+    return populated_template
+
+def _generate_response(request: Request, response: dict, response_type: str, output_template: str = None):
     """Helper function to generate the appropriate response based on response_type."""
     if response_type == "html":
-        return templates.TemplateResponse("_output.html", {"request": request, "response": response})
+        return templates.TemplateResponse(output_template + ".html", {"request": request, "response": response})
     return JSONResponse(content=response)
 
 @app.exception_handler(RequestValidationError)

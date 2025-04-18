@@ -119,9 +119,10 @@ class Summarizer:
         
         self.llm = None
         self.db_chain = None
-        self.structured_llm_sql = None
-        self.structured_llm_client = None
-        self._initialize_llm_models(model_name=model_name, temperature=temperature, json_schema_client=json_schema_client)
+        # self.structured_llm_sql = None
+        # self.structured_llm_client = None
+        # self._initialize_llm_models(model_name=model_name, temperature=temperature, json_schema_client=json_schema_client)
+        self._initialize_llm(model_name=model_name, temperature=temperature)
         
     def dispose(self):
         """Dispose of the SQLite database connection."""
@@ -135,7 +136,7 @@ class Summarizer:
         db = SQLDatabase.from_uri(f"sqlite:///{db_path}", engine_args = {"pool_size": pool_size})
         return db
               
-    def _initialize_llm_models(self, model_name: str, temperature: int, json_schema_client: dict[str, Any]) -> None:
+    def _initialize_llm(self, model_name: str, temperature: int) -> None:
         """Initialize the OpenAI model."""
         json_schema_sql = {
             "title": "sql_query",
@@ -152,9 +153,9 @@ class Summarizer:
         # FIXME: using method="json_schema" would require additional compliance with OpenAI specifications:
         # https://platform.openai.com/docs/guides/structured-outputs/supported-schemas?api-mode=chat
         self.llm = ChatOpenAI(model_name=model_name, temperature=temperature)
-        self.structured_llm_sql = self.llm.with_structured_output(json_schema_sql)#, method="json_schema")
-        self.structured_llm_client = self.llm.with_structured_output(json_schema_client)#, method="json_schema")
-        self.db_chain = SQLiteChain(llm=self.structured_llm_sql, db=self.db)
+        structured_llm = self.llm.with_structured_output(json_schema_sql)#, method="json_schema")
+        #self.structured_llm_client = self.llm.with_structured_output(json_schema_client)#, method="json_schema")
+        self.db_chain = SQLiteChain(llm=structured_llm, db=self.db)
     
     def generate_sql_query(self, prompt: str) -> str:
         """Generate SQL query"""
@@ -170,21 +171,30 @@ class Summarizer:
         cursor.close()
         return rows
 
-    def format_data(self, prompt, data) -> str:
+    def format_data(self, prompt: str, data: Any) -> str:
         """Format extracted data into the prompt."""
         formatted_rows = "\n".join([", ".join(map(str, row)) for row in data])
         return f"{prompt}{formatted_rows}"
 
-    def get_summary_from_openai(self, system_prompt, user_prompt):
+    def format_data(self, data: Any) -> str:
+        """Format extracted data into the prompt."""
+        formatted_rows = "\n".join([", ".join(map(str, row)) for row in data])
+        return formatted_rows
+    
+    def generate_user_prompt(self, prompt: str, data: Any) -> str:
+        """Format extracted data into the prompt."""
+        return f"{prompt}{data}"
+    
+    def get_summary_from_openai(self, system_prompt: str, user_prompt: str, output_schema: dict[str, Any]) -> dict[str, Any]:
         """Send prompt to OpenAI model and get a response."""
         # Create a list of BaseMessages
         messages = [
             SystemMessage(content=system_prompt),
             HumanMessage(content=user_prompt)
         ]
-
         # Invoke the structured LLM client with the list of messages
-        response = self.structured_llm_client.invoke(messages)
+        structured_llm = self.llm.with_structured_output(output_schema)
+        response = structured_llm.invoke(messages)
 
         # Return the content of the response
         return response

@@ -1,0 +1,24 @@
+<h3>Pending Items</h3>
+<ul>
+    <li><strong>Pending Labs:</strong>
+        <ul>
+            {% for lab in pending_labs %}
+                <li>{{ lab }}</li>
+            {% endfor %}
+        </ul>
+    </li>
+    <li><strong>Pending Imaging:</strong>
+        <ul>
+            {% for imaging in pending_imaging %}
+                <li>{{ imaging }}</li>
+            {% endfor %}
+        </ul>
+    </li>
+    <li><strong>Insurance Follow-ups:</strong>
+        <ul>
+            {% for followup in insurance_followups %}
+                <li>{{ followup }}</li>
+            {% endfor %}
+        </ul>
+    </li>
+</ul>

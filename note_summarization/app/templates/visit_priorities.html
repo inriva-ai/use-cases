@@ -1,0 +1,6 @@
+<h3>Visit Priorities</h3>
+<ol>
+    {% for priority in [response.priority_1, response.priority_2, response.priority_3, response.priority_4, response.priority_5] if priority %}
+        <li>{{ priority }}</li>
+    {% endfor %}
+</ol>
