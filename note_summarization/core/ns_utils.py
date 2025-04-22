@@ -50,15 +50,15 @@ def generate_patient_summary(note_summarizer: Summarizer, patient_info: dict[str
         logging.info(f"SQL Prompt: {sql_prompt}") 
     
         query = note_summarizer.generate_sql_query(sql_prompt)
-        logging.info(f"Generated SQL Query: {query}\n")
+        logging.info(f"Generated SQL Query: {query}")
        
         # logging.info("Before executing query")
         data = note_summarizer.execute_query(query)
-        logging.info(f"After executing query: {len(data)} rows returned")
+        logging.info(f"After executing query: {len(data)} rows returned\n")
         if len(data) != 0:
             data_formatted += note_summarizer.format_data(data)
         else:    
-            data_formatted += "No data found for {sql_prompt}.\n"
+            data_formatted += f"No data found for {sql_prompt}.\n"
             logging.info(f"No data found for {sql_prompt}.")
             #return {'not_found': f"No data found for {system_prompt}"}
             #raise ValueError(f"No data found for {system_prompt}")

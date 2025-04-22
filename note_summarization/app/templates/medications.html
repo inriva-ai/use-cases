@@ -7,8 +7,11 @@
             <strong>Frequency:</strong> {{ medication.frequency }}<br>
             <strong>Start Date:</strong> {{ medication.start_date }}<br>
             <strong>End Date:</strong> {{ medication.end_date if medication.end_date else "Ongoing" }}<br>
-            <strong>End Date:</strong> {{ medication.end_date if medication.end_date else "Ongoing" }}
         </li>
     {% endfor %}
 </ul>
-<li><strong>Notes:</strong> {{ response.notes }}</li>
+{% if response.notes %}
+    <h4>Additional Notes</h4>
+    <p>{{ response.notes }}</p>
+{% endif %}
+

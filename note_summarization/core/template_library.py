@@ -20,121 +20,183 @@ sql_templates = {
 
 # User prompt templates for generating patient summaries
 prompt_templates = {
-    "demographics_summary": "Summarize the patient's demographics, including name, date of birth, primary conditions, and any known allergies:",
-    "visit_priorities": "Identify 3–5 top priorities for today's visit based on recent diagnoses, hospital visits, and medication changes:",
-    "critical_changes": "List critical changes in the patient's condition in the last 30–60 days, such as hospitalizations, new diagnoses, abnormal labs, or medication adjustments:",
-    "pending_items": "Summarize any pending labs, imaging, referrals, or insurance-related items that require follow-up:",
-    "risk_flags": "Highlight potential risk factors such as high fall risk, polypharmacy, hospice eligibility, or frequent hospitalizations:",
-    "problem_list": "List all medical conditions (active and inactive) currently documented for the patient:",
-    "problem_detail": "For each medical condition, summarize relevant recent events, associated risks, coordination notes, pending items, and action items:",
-    "admin_tasks": "List administrative tasks requiring attention such as insurance changes, incomplete forms, or facility concerns:",
-    "medications_summary": "Summarize the patient's current and past medications:",
-    "symptoms_summary": "Provide an overview of the patient's reported symptoms and their progression over time:",
-    "physical_exam_summary": "What are the key points and key notes/observations from the patient's last physical examination?",
-    "consultation_summary": "What are the key findings from the patient's last non well-visit consultation note?",
-    "immunizations_summary": "Summarize the patient's immunizations:",
-    "allergies_summary": "Highlight any noted allergies or adverse reactions documented in the patient's records."
+    "demographics": "Summarize the patient's demographics, including name, date of birth, race, ethnicity, gender, top 3-5 active conditions, and any known allergies:",
+    "visit_priorities": "Identify 3–5 top priorities for today's visit based on recent diagnoses, hospital visits, and medication changes. For each priority, provide associated action items:",
+    "critical_changes": "List critical changes in the patient's condition since the last well visit, such as hospitalizations, new diagnoses, abnormal labs, or medication adjustments:",
+    #"pending_items": "Summarize any pending labs, imaging, referrals, or insurance-related items that require follow-up:",
+    #"risk_flags": "Highlight potential risk factors such as high fall risk, polypharmacy, hospice eligibility, or frequent hospitalizations:",
+    "problem_list": "List all active medical conditions currently documented for the patient.\
+                     For each medical condition, summarize relevant recent events, associated risks, coordination notes, pending items, and action items:",
+    "admin_notes": "List administrative tasks (if any) requiring attention such as insurance changes or incomplete forms:",
+    "medications": "Summarize the patient's current and past medications:",
+    "symptoms": "Provide an overview of the patient's reported symptoms and their progression over time:",
+    "physical_exam": "What are the key points and key notes/observations from the patient's last physical examination?",
+    "consultation": "What are the key findings from the patient's last non well-visit consultation note?",
+    "immunizations": "Summarize the patient's immunizations:",
+    "allergies": "Highlight any noted allergies or adverse reactions documented in the patient's records."
 }
 
+default_output_schema = {
+  "title": "generic_summary",
+  "description": "Structured format for summarization. Output only information relevant to the prompt. Do not output unavailable information.",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the summary."
+    },
+    "abstract": {
+      "type": "string",
+      "description": "A brief summary of the key findings and conclusions."
+    },
+    "context": {
+      "type": "string",
+      "description": "Background information relevant to the summary."
+    },
+    "key_points": {
+      "type": "array",
+      "description": "List of main points covered in the summary.",
+      "items": { "type": "string" }
+    },
+    "data": {
+      "type": "array",
+      "description": "Structured data relevant to the summary.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": { "type": "string", "description": "Category of the data." },
+          "details": { "type": "string", "description": "Details of the data entry." },
+          "date": { "type": "string", "format": "date", "description": "Date of relevance." }
+        }
+      }
+    },
+    "analysis": {
+      "type": "string",
+      "description": "Interpretation and analysis of the summarized information."
+    },
+    "recommendations": {
+      "type": "string",
+      "description": "Recommendations based on the summary."
+    },
+    "conclusion": {
+      "type": "string",
+      "description": "Final summary of findings and next steps."
+    }
+  },
+  "required": ["title", "abstract", "context", "key_points", "conclusion"]
+}
 # Reformatted output_templates to match the format of json_schema_client
 output_schemas = {
-    "demographics_summary": {
+    "demographics": {
         "title": "demographics_summary",
         "description": "Structured format for summarizing patient demographics.",
         "type": "object",
         "properties": {
             "name": { "type": "string", "description": "Patient's full name." },
             "dob": { "type": "string", "format": "date", "description": "Date of birth." },
-            "primary_conditions": { "type": "array", "items": { "type": "string" }, "description": "Primary medical conditions." },
+            "race": { "type": "string", "description": "Patient's race." },
+            "ethnicity": { "type": "string", "description": "Patient's ethnicity." },
+            "gender": { "type": "string", "description": "Patient's gender." },
+            "primary_conditions": { "type": "array", "items": { "type": "string" }, "description": "Top 3-5 active conditions." },
             "allergies": { "type": "array", "items": { "type": "string" }, "description": "Known allergies." }
         },
         "required": ["name", "dob"]
     },
     "visit_priorities": {
         "title": "visit_priorities",
-        "description": "Structured format for identifying visit priorities.",
+        "description": "Structured format for identifying visit priorities with associated action items.",
         "type": "object",
         "properties": {
-            "priority_1": { "type": "string", "description": "First priority for the visit." },
-            "priority_2": { "type": "string", "description": "Second priority for the visit." },
-            "priority_3": { "type": "string", "description": "Third priority for the visit." },
-            "priority_4": { "type": "string", "description": "Fourth priority for the visit." },
-            "priority_5": { "type": "string", "description": "Fifth priority for the visit." }
+            "priorities": {
+                "type": "array",
+                "description": "List of visit priorities with associated action items.",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "name": { "type": "string", "description": "Name of the priority." },
+                        "action_items": {
+                            "type": "array",
+                            "description": "List of action items associated with the priority.",
+                            "items": { "type": "string" }
+                        }
+                    },
+                    "required": ["name", "action_items"]
+                }
+            }
         },
-        "required": ["priority_1"]
+        "required": ["priorities"]
     },
     "critical_changes": {
         "title": "critical_changes",
-        "description": "Structured format for summarizing critical changes since the last visit.",
+        "description": "Structured format for summarizing critical changes since the last well visit.",
         "type": "object",
         "properties": {
-            "hospitalizations": { "type": "array", "items": { "type": "string" }, "description": "Recent hospitalizations." },
-            "new_diagnoses": { "type": "array", "items": { "type": "string" }, "description": "New diagnoses." },
-            "abnormal_labs": { "type": "array", "items": { "type": "string" }, "description": "Abnormal lab results." },
-            "medication_changes": { "type": "array", "items": { "type": "string" }, "description": "Changes in medications." }
+            "changes": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "List of all critical changes (hospitalizations, new diagnoses, abnormal labs, medication changes)."
+            }
         },
-        "required": ["hospitalizations", "new_diagnoses"]
+        "required": ["changes"]
     },
-    "pending_items": {
-        "title": "pending_items",
-        "description": "Structured format for summarizing pending items.",
+    "active_problem_list": {
+        "title": "active_problem_list",
+        "description": "Structured format for listing medical conditions with detailed subsections.",
         "type": "object",
         "properties": {
-            "pending_labs": { "type": "array", "items": { "type": "string" }, "description": "Pending lab results." },
-            "pending_imaging": { "type": "array", "items": { "type": "string" }, "description": "Pending imaging studies." },
-            "insurance_followups": { "type": "array", "items": { "type": "string" }, "description": "Insurance-related follow-ups." }
+            "problems": {
+                "type": "array",
+                "description": "List of problems with detailed information.",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "condition_name": { "type": "string", "description": "Name of the medical condition." },
+                        "recent_events": {
+                            "type": "array",
+                            "items": { "type": "string" },
+                            "description": "Relevant recent events such as hospitalizations, ER visits, or lab results."
+                        },
+                        "risks": {
+                            "type": "array",
+                            "items": { "type": "string" },
+                            "description": "Specific risks associated with the condition."
+                        },
+                        "coordination_notes": {
+                            "type": "array",
+                            "items": { "type": "string" },
+                            "description": "Notes on coordination with other providers or family."
+                        },
+                        "pending_items": {
+                            "type": "array",
+                            "items": { "type": "string" },
+                            "description": "Pending labs, tests, or referrals."
+                        },
+                        "suggested_actions": {
+                            "type": "array",
+                            "items": { "type": "string" },
+                            "description": "Recommended actions or to-dos for the condition."
+                        }
+                    },
+                    "required": ["condition_name", "status"]
+                }
+            }
         },
-        "required": ["pending_labs"]
+        "required": ["problems"]
     },
-    "risk_flags": {
-        "title": "risk_flags",
-        "description": "Structured format for highlighting risk factors.",
+    "admin_notes": {
+        "title": "admin_notes",
+        "description": "Structured format for listing administrative notes.",
         "type": "object",
         "properties": {
-            "fall_risk": { "type": "boolean", "description": "High fall risk." },
-            "polypharmacy": { "type": "boolean", "description": "Polypharmacy risk." },
-            "hospice_eligibility": { "type": "boolean", "description": "Hospice eligibility." },
-            "frequent_hospitalizations": { "type": "boolean", "description": "Frequent hospitalizations." }
+            "notes": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "List of all administrative concerns (insurance issues, documentation needs)."
+            }
         },
-        "required": ["fall_risk"]
+        "required": ["notes"]
     },
-    "problem_list": {
-        "title": "problem_list",
-        "description": "Structured format for listing medical conditions.",
-        "type": "object",
-        "properties": {
-            "condition_name": { "type": "string", "description": "Name of the medical condition." },
-            "status": { "type": "string", "description": "Status of the condition (active/inactive)." },
-            "onset_date": { "type": "string", "format": "date", "description": "Date of onset." },
-            "notes": { "type": "string", "description": "Additional notes about the condition." }
-        },
-        "required": ["condition_name", "status"]
-    },
-    "problem_detail": {
-        "title": "problem_detail",
-        "description": "Structured format for detailing medical conditions.",
-        "type": "object",
-        "properties": {
-            "condition": { "type": "string", "description": "Name of the medical condition." },
-            "events": { "type": "array", "items": { "type": "string" }, "description": "Relevant recent events." },
-            "risks": { "type": "array", "items": { "type": "string" }, "description": "Associated risks." },
-            "pending_items": { "type": "array", "items": { "type": "string" }, "description": "Pending items related to the condition." },
-            "action_items": { "type": "array", "items": { "type": "string" }, "description": "Action items for the condition." }
-        },
-        "required": ["condition"]
-    },
-    "admin_tasks": {
-        "title": "admin_tasks",
-        "description": "Structured format for listing administrative tasks.",
-        "type": "object",
-        "properties": {
-            "insurance_issues": { "type": "array", "items": { "type": "string" }, "description": "Insurance-related issues." },
-            "facility_concerns": { "type": "array", "items": { "type": "string" }, "description": "Concerns related to facilities." },
-            "documentation_needs": { "type": "array", "items": { "type": "string" }, "description": "Documentation needs." }
-        },
-        "required": ["insurance_issues"]
-    },
-    "medications_summary": {
+    "medications": {
       "title": "medications_summary",
       "description": "Medications prescribed to the patient. Structured format for medical notes in research paper-like format. Output only information relevant to the prompt. Do not output unavailable information",   
       "type": "object",
@@ -156,80 +218,26 @@ output_schemas = {
       },
       "notes": { "type": "string", "description": "Additional notes about medications." }
       },
+      "required": ["notes"]
     },
-    "symptoms_summary": {
-        "title": "symptoms_summary",
-        "description": "Structured format for summarizing symptoms.",
-        "type": "object",
-        "properties": {
-            "symptom_name": { "type": "string", "description": "Name of the symptom." },
-            "onset_date": { "type": "string", "format": "date", "description": "Date of onset." },
-            "progression": { "type": "string", "description": "Progression of the symptom over time." },
-            "notes": { "type": "string", "description": "Additional notes about the symptom." }
-        },
-        "required": ["symptom_name", "onset_date"]
-    },
-    "physical_exam_summary": {
-        "title": "physical_exam_summary",
-        "description": "Structured format for summarizing physical exam findings.",
-        "type": "object",
-        "properties": {
-            "exam_date": { "type": "string", "format": "date", "description": "Date of the physical exam." },
-            "key_points": { "type": "array", "items": { "type": "string" }, "description": "Key points from the physical exam." },
-            "notes": { "type": "string", "description": "Additional notes about the physical exam." }
-        },
-        "required": ["exam_date", "key_points"]
-    },
-    "consultation_summary": {
-        "title": "consultation_summary",
-        "description": "Structured format for summarizing consultation findings.",
-        "type": "object",
-        "properties": {
-            "consultation_date": { "type": "string", "format": "date", "description": "Date of the consultation." },
-            "key_findings": { "type": "array", "items": { "type": "string" }, "description": "Key findings from the consultation." },
-            "notes": { "type": "string", "description": "Additional notes about the consultation." }
-        },
-        "required": ["consultation_date", "key_findings"]
-    },
-    "immunizations_summary": {
-        "title": "immunizations_summary",
-        "description": "Structured format for summarizing immunizations.",
-        "type": "object",
-        "properties": {
-            "immunization_name": { "type": "string", "description": "Name of the immunization." },
-            "date_administered": { "type": "string", "format": "date", "description": "Date the immunization was administered." },
-            "notes": { "type": "string", "description": "Additional notes about the immunization." }
-        },
-        "required": ["immunization_name", "date_administered"]
-    },
-    "allergies_summary": {
-        "title": "allergies_summary",
-        "description": "Structured format for summarizing allergies.",
-        "type": "object",
-        "properties": {
-            "allergy_name": { "type": "string", "description": "Name of the allergy." },
-            "reaction": { "type": "string", "description": "Description of the reaction." },
-            "notes": { "type": "string", "description": "Additional notes about the allergy." }
-        },
-        "required": ["allergy_name", "reaction"]
-    }
+   "default_output_schema": default_output_schema,
 }
 
 # Combine SQL templates, prompt templates, and structured output templates into a single library
 patient_templates = {
     "patient_demographics": {
-        "name": "Patient Demographics",
-        "prompt": "demographics_summary",
+        "name": "Patient Demographics (*)",
+        "prompt": "demographics",
         "sql_prompts": [
             "demographics_sql",
             "conditions_sql",
             "allergies_sql"
         ],
-        "output_schema": "demographics_summary",
-        "user_output": "demographics_summary"
+        "output_schema": "demographics",
+        "output_template": "demographics"
     },
     "visit_priorities": {
-        "name": "Visit Priorities",
+        "name": "Visit Priorities (*)",
         "prompt": "visit_priorities",
         "sql_prompts": [
             "encounters_sql",
@@ -237,10 +245,10 @@ patient_templates = {
             "medications_sql"
         ],
         "output_schema": "visit_priorities",
-        "user_output": "visit_priorities"
+        "output_template": "visit_priorities"
     },
     "critical_changes": {
-        "name": "Critical Changes",
+        "name": "Critical Changes (*)",
         "prompt": "critical_changes",
         "sql_prompts": [
             "encounters_sql",
@@ -249,113 +257,116 @@ patient_templates = {
             "medications_sql"
         ],
         "output_schema": "critical_changes",
-        "user_output": "critical_changes"
-    },
-    "pending_items": {
-        "name": "Pending Items",
-        "prompt": "pending_items",
-        "sql_prompts": [
-            "labs_sql",
-            "imaging_sql",
-            "insurance_sql"
-        ],
-        "output_schema": "pending_items",
-        "user_output": "pending_items"
-    },
-    "risk_flags": {
-        "name": "Risk Flags",
-        "prompt": "risk_flags",
-        "sql_prompts": [
-            "hospitalizations_sql",
-            "medications_sql"
-        ],
-        "output_schema": "risk_flags",
-        "user_output": "risk_flags"
+        "output_template": "critical_changes"
     },
     "active_problem_list": {
-        "name": "Active Problem List",
+        "name": "Active Problem List (*)",
         "prompt": "problem_list",
         "sql_prompts": [
             "conditions_sql"
         ],
-        "output_schema": "problem_list",
-        "user_output": "problem_list"
+        "output_schema": "active_problem_list",
+        "output_template": "active_problem_list"
     },
-    "problem_detail": {
-        "name": "Problem Detail",
-        "prompt": "problem_detail",
-        "sql_prompts": [
-            "conditions_sql",
-            "encounters_sql",
-            "labs_sql",
-            "medications_sql",
-            "insurance_sql"
-        ],
-        "output_schema": "problem_detail",
-        "user_output": "problem_detail"
-    },
-    "administrative_overview": {
-        "name": "Administrative Overview",
-        "prompt": "admin_tasks",
+    
+    "administrative_notes": {
+        "name": "Administrative Notes (*)",
+        "prompt": "admin_notes",
         "sql_prompts": [
             "insurance_sql",
-            "encounters_sql"
-        ],
-        "output_schema": "admin_tasks",
-        "user_output": "admin_tasks"
+          ],
+        "output_schema": "admin_notes",
+        "output_template": "admin_notes"
     },
     "medications": {
-        "name": "Medications",
-        "prompt": "medications_summary",
+        "name": "Medications (*)",
+        "prompt": "medications",
         "sql_prompts": [
-            "medications_sql"
+            "medications_sql",
         ],
-        "output_schema": "medications_summary",
-        "user_output": "medications_summary"
+        "output_schema": "medications",
+        "output_template": "medications"
     },
     "symptoms": {
         "name": "Symptoms",
-        "prompt": "symptoms_summary",
+        "prompt": "symptoms",
         "sql_prompts": [
-            "encounters_sql"
+            "encounters_sql",
         ],
-        "output_schema": "symptoms_summary",
-        "user_output": "symptoms_summary"
+        "output_schema": "default_output_schema",
+        "output_template": "default_output_template"
     },
     "physical_exam": {
         "name": "Physical Exam",
-        "prompt": "physical_exam_summary",
+        "prompt": "physical_exam",
         "sql_prompts": [
-            "encounters_sql"
+            "encounters_sql",
         ],
-        "output_schema": "physical_exam_summary",
-        "user_output": "physical_exam_summary"
+        "output_schema": "default_output_schema",
+        "output_template": "default_output_template"
     },
     "consultation": {
         "name": "Consultation",
-        "prompt": "consultation_summary",
+        "prompt": "consultation",
         "sql_prompts": [
-            "encounters_sql"
+            "encounters_sql",
         ],
-        "output_schema": "consultation_summary",
-        "user_output": "consultation_summary"
+        "output_schema": "default_output_schema",
+        "output_template": "default_output_template"
     },
     "immunizations": {
         "name": "Immunizations",
-        "prompt": "immunizations_summary",
+        "prompt": "immunizations",
         "sql_prompts": [
-            "immunizations_sql"
+            "immunizations_sql",
         ],
-        "output_schema": "immunizations_summary",
-        "user_output": "immunizations_summary"
+        "output_schema": "default_output_schema",
+        "output_template": "default_output_template"
     },
     "allergies": {
         "name": "Allergies",
-        "prompt": "allergies_summary",
+        "prompt": "allergies",
         "sql_prompts": [
-            "allergies_sql"
+            "allergies_sql",
         ],
-        "output_schema": "allergies_summary",
-        "user_output": "allergies_summary"
+        "output_schema": "default_output_schema",
+        "output_template": "default_output_template"
     }
 }
+
+# patient_templates = {
+#     "medications": {
+#         "name":  "medications",
+#         "sql_prompt": "What medications are prescribed to the patient {patient_details}? Retrieve ALL medications for the patient.",
+#         "prompt": "Summarize the patient's current medications:\n"
+
+#     },
+#     "symptoms": {
+#         "name":  "encounters",
+#         "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
+#         "prompt": "Provide an overview of the patient's reported symptoms and their progression over time:\n"
+#     },
+#     "physical_exam": {
+#         "name":  "physical_exam",
+#         "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
+#         "prompt": "What are the key points and key notes/observations from the patient's last physical examination?\n"
+#     },
+#     "consultation": {
+#         "name":  "consultation",
+#         "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
+#         "prompt": "What are the key findings from the patient's last non well-visit consultation note?\n"
+#     },
+#     "immunizations": {
+#         "name":  "immunizations",
+#         "sql_prompt" : "Retrieve ALL immunizations for the patient {patient_details}.", 
+#         "prompt": "Summarize the patient's immunizations:\n"
+#     },
+#     "allergies": {
+#         "name":  "allergies",
+#         "sql_prompt": "In a single query retrieve ALL noted allergies or adverse reactions information for the patient {patient_details}.",
+#         "prompt": "Highlight any noted allergies or adverse reactions documented in the patient's records.\n"
+#     },
+# }
+# #    "history": "Summarize the patient's medical history relevant to their current condition.",
+# #    "chronic_conditions": "Highlight any chronic conditions and their management plans documented in the patient's history.",
+# #    "procedures": "Summarize the patient's relevant procedures and surgeries.",

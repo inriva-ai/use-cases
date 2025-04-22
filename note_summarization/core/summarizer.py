@@ -16,8 +16,8 @@ from langchain_openai import ChatOpenAI
 from langchain.schema import SystemMessage, HumanMessage
 
 # Schemas for LLM structured output
-from core.json_schemas import json_schema_client
-from sqlalchemy import text
+# from core.json_schemas import json_schema_client
+# from sqlalchemy import text
 
 # %%
 # Define SQLiteChain class
@@ -110,7 +110,7 @@ class SQLiteChain:
 # %%
 # Define Summarizer class
 class Summarizer:
-    def __init__(self, db_path: StopIteration, pool_size: int=5,  model_name: str="gpt-4o", temperature: int=0, json_schema_client: dict[str, Any]=json_schema_client):
+    def __init__(self, db_path: StopIteration, pool_size: int=5,  model_name: str="gpt-4o", temperature: int=0):#, json_schema_client: dict[str, Any]=json_schema_client):
         """Constructor for the Summarizer class"""
 
         self.db = self._initialize_db_connection(db_path=db_path, pool_size=pool_size)
@@ -171,10 +171,10 @@ class Summarizer:
         cursor.close()
         return rows
 
-    def format_data(self, prompt: str, data: Any) -> str:
-        """Format extracted data into the prompt."""
-        formatted_rows = "\n".join([", ".join(map(str, row)) for row in data])
-        return f"{prompt}{formatted_rows}"
+    # def format_data(self, prompt: str, data: Any) -> str:
+    #     """Format extracted data into the prompt."""
+    #     formatted_rows = "\n".join([", ".join(map(str, row)) for row in data])
+    #     return f"{prompt}{formatted_rows}"
 
     def format_data(self, data: Any) -> str:
         """Format extracted data into the prompt."""

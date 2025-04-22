@@ -1,6 +1,13 @@
-<h3>Visit Priorities</h3>
+<h3>Visit Priorities (Today’s Focus)</h3>
 <ol>
-    {% for priority in [response.priority_1, response.priority_2, response.priority_3, response.priority_4, response.priority_5] if priority %}
-        <li>{{ priority }}</li>
+    {% for priority in response.priorities if priority %}
+        <li>
+            <strong>{{ priority.name }}</strong>
+            <ul style="list-style-type: disc;">
+                {% for action_item in priority.action_items %}
+                    <li>{{ action_item }}</li>
+                {% endfor %}
+            </ul>
+        </li>
     {% endfor %}
 </ol>

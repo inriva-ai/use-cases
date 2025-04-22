@@ -1,0 +1,14 @@
+<h3>Demographics Summary</h3>
+<strong>Name:</strong> {{ response.name }}<br>
+<ul>
+    <li><strong>DOB:</strong> {{ response.dob | datetimeformat if response.dob else "Unknown" }}</li>
+    <li><strong>Race:</strong> {{ response.race if response.race else "Unknown" }}</li>
+    <li><strong>Ethnicity:</strong> {{ response.ethnicity if response.ethnicity else "Unknown" }}</li>
+    <li><strong>Gender:</strong> {{ response.gender if response.gender else "Unknown" }}</li>
+    <li><strong>Primary Conditions:</strong> 
+        {{ response.primary_conditions | join(', ') if response.primary_conditions else "Unknown" }}
+    </li>
+    <li><strong>Allergies:</strong> 
+        {{ response.allergies | join(', ') if response.allergies else "Unknown" }}
+    </li>
+</ul>

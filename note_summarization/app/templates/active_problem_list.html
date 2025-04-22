@@ -1,0 +1,45 @@
+<h3>Problem-Oriented Summary (Main Body of Report)</h3>
+<div>
+    {% for problem in response.problems %}
+        <div>
+            <h4><strong>{{ loop.index }}. {{ problem.condition_name }}</strong></h4>
+            <ul style="list-style-type: disc;">
+                <li><strong>Recent Events:</strong>
+                    <ul style="list-style-type: circle;">
+                        {% for event in problem.recent_events %}
+                            <li>{{ event }}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                <li><strong>Risks:</strong>
+                    <ul style="list-style-type: circle;">
+                        {% for risk in problem.risks %}
+                            <li>{{ risk }}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                <li><strong>Coordination Notes:</strong>
+                    <ul style="list-style-type: circle;">
+                        {% for note in problem.coordination_notes %}
+                            <li>{{ note }}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                <li><strong>Pending Items:</strong>
+                    <ul style="list-style-type: circle;">
+                        {% for item in problem.pending_items %}
+                            <li>{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                <li><strong>To-Dos / Suggested Actions:</strong>
+                    <ul style="list-style-type: circle;">
+                        {% for action in problem.suggested_actions %}
+                            <li>{{ action }}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    {% endfor %}
+</div>

@@ -1,31 +1,6 @@
-<h3>Critical Changes</h3>
+<h3>Critical Changes Since Last Visit</h3>
 <ul>
-    <li><strong>Hospitalizations:</strong>
-        <ul>
-            {% for hospitalization in hospitalizations %}
-                <li>{{ hospitalization }}</li>
-            {% endfor %}
-        </ul>
-    </li>
-    <li><strong>New Diagnoses:</strong>
-        <ul>
-            {% for diagnosis in new_diagnoses %}
-                <li>{{ diagnosis }}</li>
-            {% endfor %}
-        </ul>
-    </li>
-    <li><strong>Abnormal Labs:</strong>
-        <ul>
-            {% for lab in abnormal_labs %}
-                <li>{{ lab }}</li>
-            {% endfor %}
-        </ul>
-    </li>
-    <li><strong>Medication Changes:</strong>
-        <ul>
-            {% for change in medication_changes %}
-                <li>{{ change }}</li>
-            {% endfor %}
-        </ul>
-    </li>
+    {% for change in response.changes %}
+        <li>{{ change }}</li>
+    {% endfor %}
 </ul>

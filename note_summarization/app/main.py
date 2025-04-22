@@ -24,6 +24,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Query, Body
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
+from datetime import datetime
 
 # Imports for logging
 import logging
@@ -36,6 +37,10 @@ from fastapi import Request, status
 
 # Define constants
 CONFIG_PATH = ROOT_DIR / "config/config.dev.yml"
+
+# Custom filter for formatting dates
+def datetimeformat(value, format='%m/%d/%Y'):
+    return datetime.strptime(value, '%Y-%m-%d').strftime(format)
 
 class NoteSummarizerFastAPI(FastAPI):
  
@@ -56,7 +61,10 @@ class NoteSummarizerFastAPI(FastAPI):
         self.db_path = ROOT_DIR / self.config["database"]["path"]
         self.data_dir = ROOT_DIR / self.config["database"]["data_dir"]
 
+        # Load OpenAI API key from .env file
         setup_openai_api_key()
+
+        # Set up OpenAI API key from the config file
         #os.environ["OPENAI_API_KEY"] = self.config["openai"]["api_key"]
 
     def _setup_logging(self):
@@ -122,6 +130,9 @@ app = NoteSummarizerFastAPI(config_path=CONFIG_PATH, lifespan=lifespan)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
+# Add the filter to Jinja2
+templates.env.filters['datetimeformat'] = datetimeformat
+
 @app.get("/")
 def read_root():
     return {"message": f"Welcome to {app.title}!"}
@@ -134,7 +145,7 @@ def ingest_database():
 @app.get("/templates")
 def get_templates():
     """Endpoint to retrieve available templates."""
-    return {"templates": [(key, value["name"]) for key, value in patient_templates.items()]}
+    return {"templates": sorted([(key, value["name"]) for key, value in patient_templates.items()])}
 
 
 # API endpoint to generate a patient summary
@@ -189,9 +200,10 @@ async def answer_question(
     except Exception as e:
         response = {"error": str(e)}
         logging.error(f"Error generating summary for patient {patient_info}: {e}")
-        
+        return _generate_response(data, response, response_type)
+         
     # Render only the output section of the template
-    return _generate_response(data, response, response_type, template["user_output"])
+    return _generate_response(data, response, response_type, template["output_template"])
 
 def _populate_tempalate(template:dict)-> dict:
     """Format the template to be used to answer the question. Specificalliy, it will replace the prompt, sql_templates and output_schema with the actual templates:
@@ -199,7 +211,7 @@ def _populate_tempalate(template:dict)-> dict:
         "prompt",
         "sql_prompts": [],
         "output_schema",
-        "user_output"
+        "output_template"
     }    
     """   
     populated_template = template.copy()
@@ -213,7 +225,7 @@ def _populate_tempalate(template:dict)-> dict:
 
 def _generate_response(request: Request, response: dict, response_type: str, output_template: str = None):
     """Helper function to generate the appropriate response based on response_type."""
-    if response_type == "html":
+    if response_type == "html" and output_template is not None:
         return templates.TemplateResponse(output_template + ".html", {"request": request, "response": response})
     return JSONResponse(content=response)
 
