@@ -1,4 +1,7 @@
-json_schema_client = {
+# These depriciated templates are currently only being used in ns.py sample console application.
+# The latest versions of tempaltes are located in tempale_library.py and are being used in the FastAPI application.
+
+json_schema_default = {
   "title": "generic_summary",
   "description": "Structured format for summarization. Output only information relevant to the prompt. Do not output unavailable information.",
   "type": "object",
@@ -142,34 +145,40 @@ json_schema_medical = {
 patient_templates = {
     "medications": {
         "name":  "medications",
-        "sql_prompt": "What medications are prescribed to the patient {patient_details}? Retrieve ALL medications for the patient.",
-        "prompt": "Summarize the patient's current medications:\n"
+        "sql_prompts": ["What medications are prescribed to the patient {patient_details}? Retrieve ALL medications for the patient."],
+        "prompt": "Summarize the patient's current medications:\n",
+        "output_schema": json_schema_default
 
     },
     "symptoms": {
         "name":  "encounters",
-        "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
-        "prompt": "Provide an overview of the patient's reported symptoms and their progression over time:\n"
+        "sql_prompts": ["In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations."],
+        "prompt": "Provide an overview of the patient's reported symptoms and their progression over time:\n",
+        "output_schema": json_schema_default
     },
     "physical_exam": {
         "name":  "physical_exam",
-        "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
-        "prompt": "What are the key points and key notes/observations from the patient's last physical examination?\n"
+        "sql_prompts": ["In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations."],
+        "prompt": "What are the key points and key notes/observations from the patient's last physical examination?\n",
+        "output_schema": json_schema_default
     },
     "consultation": {
         "name":  "consultation",
-        "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
-        "prompt": "What are the key findings from the patient's last non well-visit consultation note?\n"
+        "sql_prompts": ["In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations."],
+        "prompt": "What are the key findings from the patient's last non well-visit consultation note?\n",
+        "output_schema": json_schema_default
     },
     "immunizations": {
         "name":  "immunizations",
-        "sql_prompt" : "Retrieve ALL immunizations for the patient {patient_details}.", 
-        "prompt": "Summarize the patient's immunizations:\n"
+        "sql_prompts" : ["Retrieve ALL immunizations for the patient {patient_details}."], 
+        "prompt": "Summarize the patient's immunizations:\n",
+        "output_schema": json_schema_default
     },
     "allergies": {
         "name":  "allergies",
-        "sql_prompt": "In a single query retrieve ALL noted allergies or adverse reactions information for the patient {patient_details}.",
-        "prompt": "Highlight any noted allergies or adverse reactions documented in the patient's records.\n"
+        "sql_prompts": ["In a single query retrieve ALL noted allergies or adverse reactions information for the patient {patient_details}."],
+        "prompt": "Highlight any noted allergies or adverse reactions documented in the patient's records.\n",
+        "output_schema": json_schema_default
     },
 }
 #    "history": "Summarize the patient's medical history relevant to their current condition.",

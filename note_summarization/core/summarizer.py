@@ -15,10 +15,6 @@ from langchain_community.utilities.sql_database import SQLDatabase
 from langchain_openai import ChatOpenAI
 from langchain.schema import SystemMessage, HumanMessage
 
-# Schemas for LLM structured output
-# from core.json_schemas import json_schema_client
-# from sqlalchemy import text
-
 # %%
 # Define SQLiteChain class
 class SQLiteChain:
@@ -110,7 +106,7 @@ class SQLiteChain:
 # %%
 # Define Summarizer class
 class Summarizer:
-    def __init__(self, db_path: StopIteration, pool_size: int=5,  model_name: str="gpt-4o", temperature: int=0):#, json_schema_client: dict[str, Any]=json_schema_client):
+    def __init__(self, db_path: StopIteration, pool_size: int=5,  model_name: str="gpt-4o", temperature: int=0):
         """Constructor for the Summarizer class"""
 
         self.db = self._initialize_db_connection(db_path=db_path, pool_size=pool_size)
@@ -119,9 +115,6 @@ class Summarizer:
         
         self.llm = None
         self.db_chain = None
-        # self.structured_llm_sql = None
-        # self.structured_llm_client = None
-        # self._initialize_llm_models(model_name=model_name, temperature=temperature, json_schema_client=json_schema_client)
         self._initialize_llm(model_name=model_name, temperature=temperature)
         
     def dispose(self):
@@ -154,14 +147,12 @@ class Summarizer:
         # https://platform.openai.com/docs/guides/structured-outputs/supported-schemas?api-mode=chat
         self.llm = ChatOpenAI(model_name=model_name, temperature=temperature)
         structured_llm = self.llm.with_structured_output(json_schema_sql)#, method="json_schema")
-        #self.structured_llm_client = self.llm.with_structured_output(json_schema_client)#, method="json_schema")
         self.db_chain = SQLiteChain(llm=structured_llm, db=self.db)
     
     def generate_sql_query(self, prompt: str) -> str:
         """Generate SQL query"""
         response = self.db_chain.invoke(prompt)
         sql_query = response['sql']
-        # print(f"Generated SQL query: {sql_query}")  # Debugging step
         return sql_query
 
     def execute_query(self, query: str) -> Any:
@@ -170,12 +161,7 @@ class Summarizer:
         rows = cursor.all()
         cursor.close()
         return rows
-
-    # def format_data(self, prompt: str, data: Any) -> str:
-    #     """Format extracted data into the prompt."""
-    #     formatted_rows = "\n".join([", ".join(map(str, row)) for row in data])
-    #     return f"{prompt}{formatted_rows}"
-
+    
     def format_data(self, data: Any) -> str:
         """Format extracted data into the prompt."""
         formatted_rows = "\n".join([", ".join(map(str, row)) for row in data])

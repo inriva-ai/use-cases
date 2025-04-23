@@ -36,7 +36,7 @@ def delete_database(db_path: str):
     else:
         logging.info(f"No database file found at: {db_path}")
 
-def generate_patient_summary(note_summarizer: Summarizer, patient_info: dict[str, Any], template: str):
+def generate_patient_summary(note_summarizer: Summarizer, patient_info: dict[str, Any], template: dict[str, Any]) -> dict[str, Any]:
     """Generate a patient summary using all templates."""
     first_name = patient_info["first_name"]
     last_name = patient_info["last_name"]
@@ -58,14 +58,12 @@ def generate_patient_summary(note_summarizer: Summarizer, patient_info: dict[str
         if len(data) != 0:
             data_formatted += note_summarizer.format_data(data)
         else:    
-            data_formatted += f"No data found for {sql_prompt}.\n"
             logging.info(f"No data found for {sql_prompt}.")
-            #return {'not_found': f"No data found for {system_prompt}"}
-            #raise ValueError(f"No data found for {system_prompt}")
+    if len(data_formatted) == 0:
+        raise ValueError(f"No data found for the patient {first_name} {last_name}.")
 
     user_prompt = note_summarizer.generate_user_prompt(template["prompt"], data_formatted)
     #logging.info(f"User Prompt: {user_prompt}")
-     
     summary = note_summarizer.get_summary_from_openai(system_prompt, user_prompt, template["output_schema"])
 
     return summary

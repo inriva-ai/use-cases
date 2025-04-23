@@ -1,7 +1,7 @@
-# This module defines the template library for generating patient summaries and SQL queries.
+# This module defines the template library for generating patient summaries.
 # It includes a library of prompt templates for different sections of the summary and SQL queries to retrieve patient data.
-# The templates are organized into sections and subsections, each with its own prompt template and SQL queries.
-# The SQL queries are designed to retrieve specific information about the patient, such as demographics, conditions, allergies, encounters, medications, labs, imaging, insurance, hospitalizations, and polypharmacy.
+# The SQL queries are designed to retrieve specific information about the patient, such as demographics, conditions, allergies, encounters, etc.
+# The templates are organized into sections, each with its own prompt template and SQL queries.
 
 #SQL queries templates to retrieve patient data
 sql_templates = {
@@ -36,6 +36,7 @@ prompt_templates = {
     "allergies": "Highlight any noted allergies or adverse reactions documented in the patient's records."
 }
 
+# Default JSON schema for llm structured output. It is used when no specific schema is provided.
 default_output_schema = {
   "title": "generic_summary",
   "description": "Structured format for summarization. Output only information relevant to the prompt. Do not output unavailable information.",
@@ -85,7 +86,8 @@ default_output_schema = {
   },
   "required": ["title", "abstract", "context", "key_points", "conclusion"]
 }
-# Reformatted output_templates to match the format of json_schema_client
+
+# Custom JSON schemas for llm structured output
 output_schemas = {
     "demographics": {
         "title": "demographics_summary",
@@ -223,7 +225,7 @@ output_schemas = {
    "default_output_schema": default_output_schema,
 }
 
-# Combine SQL templates, prompt templates, and structured output templates into a single library
+# Patient templates combine SQL templates, prompt templates, structured output templates, and Jinja2 html templates into a single library
 patient_templates = {
     "patient_demographics": {
         "name": "Patient Demographics (*)",
@@ -333,40 +335,3 @@ patient_templates = {
         "output_template": "default_output_template"
     }
 }
-
-# patient_templates = {
-#     "medications": {
-#         "name":  "medications",
-#         "sql_prompt": "What medications are prescribed to the patient {patient_details}? Retrieve ALL medications for the patient.",
-#         "prompt": "Summarize the patient's current medications:\n"
-
-#     },
-#     "symptoms": {
-#         "name":  "encounters",
-#         "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
-#         "prompt": "Provide an overview of the patient's reported symptoms and their progression over time:\n"
-#     },
-#     "physical_exam": {
-#         "name":  "physical_exam",
-#         "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
-#         "prompt": "What are the key points and key notes/observations from the patient's last physical examination?\n"
-#     },
-#     "consultation": {
-#         "name":  "consultation",
-#         "sql_prompt": "In a single query retrieve ALL encounters of the patient {patient_details} and for each encounter relevant conditions and observations.",
-#         "prompt": "What are the key findings from the patient's last non well-visit consultation note?\n"
-#     },
-#     "immunizations": {
-#         "name":  "immunizations",
-#         "sql_prompt" : "Retrieve ALL immunizations for the patient {patient_details}.", 
-#         "prompt": "Summarize the patient's immunizations:\n"
-#     },
-#     "allergies": {
-#         "name":  "allergies",
-#         "sql_prompt": "In a single query retrieve ALL noted allergies or adverse reactions information for the patient {patient_details}.",
-#         "prompt": "Highlight any noted allergies or adverse reactions documented in the patient's records.\n"
-#     },
-# }
-# #    "history": "Summarize the patient's medical history relevant to their current condition.",
-# #    "chronic_conditions": "Highlight any chronic conditions and their management plans documented in the patient's history.",
-# #    "procedures": "Summarize the patient's relevant procedures and surgeries.",

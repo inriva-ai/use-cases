@@ -37,13 +37,14 @@ from fastapi import Request, status
 
 # Define constants
 CONFIG_PATH = ROOT_DIR / "config/config.dev.yml"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Custom filter for formatting dates
+# Custom filter for Jinja dates formatting
 def datetimeformat(value, format='%m/%d/%Y'):
     return datetime.strptime(value, '%Y-%m-%d').strftime(format)
 
+# NoteSummarizerFastAPI class that extends FastAPI
 class NoteSummarizerFastAPI(FastAPI):
- 
     def __init__(self, config_path: str, *args, **kwargs):
         # Initialize the parent FastAPI class
         super().__init__(*args, **kwargs)
@@ -127,9 +128,9 @@ async def lifespan(app: FastAPI):
 # Initialize the FastAPI app with lifespan
 # This function will run when the app starts and stops
 app = NoteSummarizerFastAPI(config_path=CONFIG_PATH, lifespan=lifespan)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
+# Initialize Jinja2 templates and set the directory for templates
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 # Add the filter to Jinja2
 templates.env.filters['datetimeformat'] = datetimeformat
 
@@ -158,14 +159,13 @@ def get_templates():
 #     "template_name": "allergies"
 # }
 
-@app.get("/answer", response_class=HTMLResponse)
-async def get_form(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request, "response": None})
-
-
 class RequestBody(BaseModel):
     patient_info: dict
     template_name: str
+
+@app.get("/answer", response_class=HTMLResponse)
+async def get_form(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request, "response": None})
 
 @app.post("/answer")
 async def answer_question(
@@ -225,7 +225,7 @@ def _populate_tempalate(template:dict)-> dict:
 
 def _generate_response(request: Request, response: dict, response_type: str, output_template: str = None):
     """Helper function to generate the appropriate response based on response_type."""
-    if response_type == "html" and output_template is not None:
+    if response_type == "html" and output_template:
         return templates.TemplateResponse(output_template + ".html", {"request": request, "response": response})
     return JSONResponse(content=response)
 
