@@ -23,8 +23,10 @@ def setup_openai_api_key():
     # if not os.getenv("OPENAI_API_KEY"):
     #     os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter your OpenAI API key: ")
 
-
 class Config:
+    """Singleton class to manage configuration settings.
+    This class loads configuration settings from a YAML file and provides access to them.
+    """
     settings = None
 
     def __init__(self, config_path: str):

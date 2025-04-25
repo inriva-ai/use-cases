@@ -7,10 +7,10 @@
     <h2>Patient Info Form</h2>
     <form id="prompt-form">
         <label>First Name:</label><br>
-        <input type="text" placeholder="Lupe126" id="first-name" aria-label="First Name"><br><br>
+        <input type="text" id="first-name" aria-label="First Name" value="Lupe126"><br><br>
 
         <label>Last Name:</label><br>
-        <input type="text" placeholder="Rippin620" id="last-name" aria-label="Last Name"><br><br>
+        <input type="text" id="last-name" aria-label="Last Name" value="Rippin620"><br><br>
 
         <label>Template:</label><br>
         <select id="template-name" aria-label="Template Name"></select><br><br>
@@ -19,7 +19,7 @@
     </form>
 
     <div id="output">
-        {% include "_output.html" %}
+        {% include "default_output_template.html" %}
     </div>
     
     <script>
@@ -35,7 +35,7 @@
                 const data = await res.json();
                 templateSelect.innerHTML = `<option value="" disabled selected>--select template--</option>` +
                     data.templates
-                    .map(template => `<option value="${template}">${template}</option>`)
+                    .map(([key, name]) => `<option value="${key}">${name}</option>`)
                     .join("");
             } catch (error) {
                 alert(`${error}`);
@@ -44,6 +44,12 @@
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
+            
+            // Check if a valid template is selected
+            if (!templateSelect.value) {
+                alert("Please select a valid template.");
+                return; 
+            }
 
             // Show "Processing..." message in the output div
             outputDiv.innerHTML = "<p>Processing...</p>";

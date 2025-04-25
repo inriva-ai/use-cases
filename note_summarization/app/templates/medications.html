@@ -1,0 +1,17 @@
+<h3>Medications Summary</h3>
+<ul>
+    {% for medication in response.medications %}
+        <li>
+            <strong>Name:</strong> {{ medication.name }}<br>
+            <strong>Dosage:</strong> {{ medication.dosage }}<br>
+            <strong>Frequency:</strong> {{ medication.frequency }}<br>
+            <strong>Start Date:</strong> {{ medication.start_date }}<br>
+            <strong>End Date:</strong> {{ medication.end_date if medication.end_date else "Ongoing" }}<br>
+        </li>
+    {% endfor %}
+</ul>
+{% if response.notes %}
+    <h4>Additional Notes</h4>
+    <p>{{ response.notes }}</p>
+{% endif %}
+
