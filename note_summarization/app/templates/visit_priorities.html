@@ -1,4 +1,7 @@
 <h3>Visit Priorities (Today’s Focus)</h3>
+{% if request.patient_info %}
+    <h4>Patient {{ request.patient_info.first_name }} {{ request.patient_info.last_name }}</h4>
+{% endif %}
 <ol>
     {% for priority in response.priorities if priority %}
         <li>

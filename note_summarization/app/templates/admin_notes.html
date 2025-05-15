@@ -1,4 +1,7 @@
 <h3>Administrative Notes</h3>
+{% if request.patient_info %}
+    <h4>Patient {{ request.patient_info.first_name }} {{ request.patient_info.last_name }}</h4>
+{% endif %}
 <ul>
     {% for note in response.notes %}
         <li>{{ note }}</li>

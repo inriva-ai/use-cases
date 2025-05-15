@@ -1,0 +1,1 @@
+docker run -d --name ns-langflow --env-file .langflow.env -p 7860:7860  --add-host=host.docker.internal:host-gateway ghcr.io/inriva-ai/langflow-ns:latest

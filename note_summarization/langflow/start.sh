@@ -1,0 +1,1 @@
+langflow run --port 7860 --env-file .langflow.env

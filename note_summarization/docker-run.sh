@@ -1,0 +1,1 @@
+docker run -it --env-file .env -p 8085:8085 ghcr.io/inriva-ai/use-cases:latest

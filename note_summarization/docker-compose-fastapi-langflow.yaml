@@ -1,0 +1,41 @@
+services:
+  fastapi-app:
+   # Commeted out the build section to use the pre-built image from ghcr.io
+   # Uncomment the build section to build the image locally and push it to ghcr.io later
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: ghcr.io/inriva-ai/use-cases:latest
+
+    container_name: ns-fastapi-app
+    ports:
+      - "8085:8085"
+    env_file:
+      - .env
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8085
+    restart: unless-stopped
+    networks:
+      - backend
+
+  llangflow:
+    image: langflowai/langflow:latest
+    platform: linux/amd64
+    container_name: ns-langflow
+    ports:
+      - "7860:7860"
+    env_file:
+      - ./langflow/.langflow.env  
+    environment:
+      - LANGFLOW_LOAD_FLOWS_PATH=/app/flows  
+    volumes:
+      - ./langflow/ns-langflow.json:/app/flows/ns-langflow.json
+    command: langflow run --host 0.0.0.0 --port 7860  
+    depends_on:
+      - fastapi-app
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
