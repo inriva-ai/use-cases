@@ -8,7 +8,7 @@ sql_templates = {
   "demographics_sql": "Retrieve all available demographic information for the patient {patient_details}.",
   "conditions_sql": "Retrieve all medical conditions (active and inactive) for the patient {patient_details}.",
   "allergies_sql": "Retrieve all recorded allergies and adverse reactions for the patient {patient_details}.",
-  "encounters_sql": "Retrieve all hospital or facility visits associated with the patient {patient_details}, including facility details.",
+  "encounters_sql": "Retrieve all visits associated with the patient {patient_details}, including facility details.",
   "medications_sql": "Retrieve all medications associated with the patient {patient_details}.",
   "labs_sql": "Retrieve all available lab results for the patient {patient_details}.",
   "imaging_sql": "Retrieve all imaging studies performed for the patient {patient_details}.",
@@ -23,8 +23,6 @@ prompt_templates = {
     "demographics": "Summarize the patient's demographics, including name, date of birth, race, ethnicity, gender, top 3-5 active conditions, and any known allergies:",
     "visit_priorities": "Identify 3–5 top priorities for today's visit based on recent diagnoses, hospital visits, and medication changes. For each priority, provide associated action items:",
     "critical_changes": "List critical changes in the patient's condition since the last well visit, such as hospitalizations, new diagnoses, abnormal labs, or medication adjustments:",
-    #"pending_items": "Summarize any pending labs, imaging, referrals, or insurance-related items that require follow-up:",
-    #"risk_flags": "Highlight potential risk factors such as high fall risk, polypharmacy, hospice eligibility, or frequent hospitalizations:",
     "problem_list": "List all active medical conditions currently documented for the patient.\
                      For each medical condition, summarize relevant recent events, associated risks, coordination notes, pending items, and action items:",
     "admin_notes": "List administrative tasks (if any) requiring attention such as insurance changes or incomplete forms:",
@@ -261,15 +259,15 @@ patient_templates = {
         "output_schema": "critical_changes",
         "output_template": "critical_changes"
     },
-    "active_problem_list": {
-        "name": "Active Problem List (*)",
-        "prompt": "problem_list",
-        "sql_prompts": [
-            "conditions_sql"
-        ],
-        "output_schema": "active_problem_list",
-        "output_template": "active_problem_list"
-    },
+    # "active_problem_list": {
+    #     "name": "Active Problem List (*)",
+    #     "prompt": "problem_list",
+    #     "sql_prompts": [
+    #         "conditions_sql"
+    #     ],
+    #     "output_schema": "active_problem_list",
+    #     "output_template": "active_problem_list"
+    # },
     
     "administrative_notes": {
         "name": "Administrative Notes (*)",
@@ -331,6 +329,13 @@ patient_templates = {
         "sql_prompts": [
             "allergies_sql",
         ],
+        "output_schema": "default_output_schema",
+        "output_template": "default_output_template"
+    },
+    "custom": {
+        "name": "Custom",
+        "prompt": "",
+        "sql_prompts": [],
         "output_schema": "default_output_schema",
         "output_template": "default_output_template"
     }

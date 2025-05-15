@@ -4,7 +4,7 @@
 
 # Import required libraries
 import os
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 # Imports needed for MemoryCache setup
 from langchain.globals import set_llm_cache
@@ -12,11 +12,9 @@ from langchain_community.cache import InMemoryCache
 
 # Imports from custom libraries
 from core.config import ROOT_DIR, Config, setup_openai_api_key
-
 from core.summarizer import Summarizer
-#from core.json_schemas import  patient_templates
-from core.template_library import patient_templates, prompt_templates, sql_templates, output_schemas
-from  core.ns_utils import initialize_database, delete_database, generate_patient_summary
+from core.template_library import patient_templates, sql_templates
+from  core.ns_utils import NoteSummarizationUtils as ns_utils 
 
 # Imports for FastAPI
 import yaml
@@ -104,7 +102,7 @@ async def lifespan(app: FastAPI):
         
         # Initialize the database
         if not os.path.exists(app.db_path):
-            initialize_database(db_path=app.db_path, data_dir=app.data_dir)
+            ns_utils.initialize_database(db_path=app.db_path, data_dir=app.data_dir)
            
         # Initialize the Summarizer
         app.state.note_summarizer = Summarizer(db_path=app.db_path)
@@ -121,7 +119,7 @@ async def lifespan(app: FastAPI):
             app.state.note_summarizer.dispose()
             logging.info("note_summarizer cleaned up.")
         if app.config.get("database", {}).get("delete_db", False):
-            delete_database(app.db_path)
+            ns_utils.delete_database(app.db_path)
         logging.info("Closing FastAPI app.")
     
   
@@ -141,7 +139,7 @@ def read_root():
 @app.get("/ingest")
 def ingest_database():
     """Endpoint to initialize the database."""
-    return initialize_database(db_path=app.db_path, data_dir=app.data_dir)
+    return ns_utils.initialize_database(db_path=app.db_path, data_dir=app.data_dir)
 
 @app.get("/templates")
 def get_templates():
@@ -156,12 +154,18 @@ def get_templates():
 #         "first_name": "Lupe126",
 #         "last_name": "Rippin620"
 #     },
-#     "template_name": "allergies"
+#     "template_id": "allergies",
+#     "prompt: "Generate a note summary for the patient." (optional, used for custom templates)
 # }
 
+class PatientInfo(BaseModel):
+    first_name: str = Field(..., description="The first name of the patient")
+    last_name: str = Field(..., description="The last name of the patient")
+
 class RequestBody(BaseModel):
-    patient_info: dict
-    template_name: str
+    patient_info: PatientInfo
+    template_id: str
+    prompt: str | None = None 
 
 @app.get("/answer", response_class=HTMLResponse)
 async def get_form(request: Request):
@@ -169,73 +173,85 @@ async def get_form(request: Request):
 
 @app.post("/answer")
 async def answer_question(
-        request_body: RequestBody = Body(..., description="Request body containing patient info and template name"),
+        request_body: RequestBody = Body(..., description="Request body containing patient info, template id, and optional custom prompt."),
         response_type: str = Query("html", description="Response type: 'html' or 'json'")
     ):
     """Generate a patient summary using the template provided."""
     
     data = request_body.model_dump()
-    logging.info(f"Request received: {data}")
+    logging.info(f"REQUEST RECEIVED: {data}")
 
     # Extract data from the request
     patient_info = data.get("patient_info", {})
-    template_name = data.get("template_name", "")
+    template_id = data.get("template_id", "")
 
     # Validate patient_info fields
     if not patient_info.get("first_name") or not patient_info.get("last_name"):
-        response = {"error": "Invalid patient_info: Missing first_name or last_name."}
         logging.error("Invalid patient_info: Missing first_name or last_name.")
+        response = {"error": "Invalid patient_info: Missing first_name or last_name."}
         return _generate_response(data, response, response_type)
 
     # Check if the template exists
-    if template_name not in patient_templates:
-        response = {"error": f"Template '{template_name}' does not exist."}
-        logging.error(f"Template '{template_name}' does not exist.")
+    if template_id not in patient_templates:
+        logging.error(f"Template '{template_id}' does not exist.")
+        response = {"error": f"Template '{template_id}' does not exist."}
         return _generate_response(data, response, response_type)
     
-    template = _populate_tempalate(patient_templates[template_name])
+    template = patient_templates[template_id].copy()
+
+    # Custom template handling
+    is_custom_prompt = False
+    if template_id == "custom":
+        is_custom_prompt = True
+        # Check if the custom template is valid
+        template["prompt"] = data.get("prompt", "")
+        if not template["prompt"]:
+            logging.error("Custom template requires a prompt.")
+            response = {"error": "Custom template requires a prompt."}
+            return _generate_response(data, response, response_type)
+        
+        logging.info(f"Custom Prompt: {template['prompt']}")
+
+        try:
+            template["sql_prompts"] = app.state.note_summarizer.generate_sql_prompts(template["prompt"], sql_templates)
+        except Exception as e:
+            logging.error(f"Error generating sql prompts list for the custom prompt: {e}")
+            response = {"error": str(e)}
+            return _generate_response(data, response, response_type)
+        
+        if not template["sql_prompts"]:
+            logging.info("Insufficient information to answer the question.")
+            response = {"info": "Insufficient information to answer the question."}
+            return _generate_response(data, response, response_type)
+  
+    logging.info(f"Selected SQL prompts: {template['sql_prompts']}")
+    template = ns_utils.populate_tempalate(template, is_custom_prompt=is_custom_prompt)
+
     try:
-        response = generate_patient_summary(app.state.note_summarizer, patient_info=patient_info, template=template)
-        logging.info(f"Summary generated successfully for template: {template_name}")
+        response = ns_utils.generate_patient_summary(app.state.note_summarizer, patient_info=patient_info, template=template)
+        logging.info(f"Summary generated successfully for template: {template_id}")
     except Exception as e:
-        response = {"error": str(e)}
         logging.error(f"Error generating summary for patient {patient_info}: {e}")
+        response = {"error": str(e)}
         return _generate_response(data, response, response_type)
          
     # Render only the output section of the template
     return _generate_response(data, response, response_type, template["output_template"])
 
-def _populate_tempalate(template:dict)-> dict:
-    """Format the template to be used to answer the question. Specificalliy, it will replace the prompt, sql_templates and output_schema with the actual templates:
-    {
-        "prompt",
-        "sql_prompts": [],
-        "output_schema",
-        "output_template"
-    }    
-    """   
-    populated_template = template.copy()
-    populated_template["prompt"] = prompt_templates[template["prompt"]]
-    populated_template["output_schema"] = output_schemas[template["output_schema"]]
-    sql_prompts = template.get("sql_prompts", [])
-    populated_template["sql_prompts"] = []
-    for sql_prompt in sql_prompts:
-        populated_template["sql_prompts"].append(sql_templates[sql_prompt])
-    return populated_template
-
 def _generate_response(request: Request, response: dict, response_type: str, output_template: str = None):
     """Helper function to generate the appropriate response based on response_type."""
-    if response_type == "html" and output_template:
-        return templates.TemplateResponse(output_template + ".html", {"request": request, "response": response})
+    if response_type == "html":
+        if output_template:
+            return templates.TemplateResponse(output_template + ".html", {"request": request, "response": response})
+        else:
+            return templates.TemplateResponse("generic_output_template.html", {"request": request, "response": response})
     return JSONResponse(content=response)
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     body = await request.body()  # Raw request body (bytes)
-    print("🚨 Validation error:")
-    print("Request body:", body.decode("utf-8"))
-    print("Validation issues:", exc.errors())
-    
+    logging.error(f"Validation error.\n Request body: {body.decode('utf-8')}\n Validation issues: {exc.errors()}")
+        
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={

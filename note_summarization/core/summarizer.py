@@ -184,3 +184,36 @@ class Summarizer:
 
         # Return the content of the response
         return response
+
+    def generate_sql_prompts(self, prompt: str, sql_templates: dict[str, str]) -> list[str]:
+        """Generate list of SQL prompts based on the custom user prompt."""
+        json_schema_sql_prompts = {
+            "title": "sql_prompts_list",
+            "description": "List of SQL template names relevant to a user prompt.",
+            "type": "object",
+            "properties": {
+                "sql_prompts": {
+                    "type": "array",
+                    "description": "List of the SQL template names relevant to the user prompt.",
+                    "items": { "type": "string" }
+                },
+            },
+        }
+        # Create a list of SQL template names relevant to the user prompt
+        system_prompt = """ You are a SQLite expert. Given an input question, and the dictionary of available SQL templates,
+                            create a list of SQL template names relevant to the question. """
+        user_prompt = f"Question: {prompt}\nSQL templates: {sql_templates}"
+        
+        # Create a list of BaseMessages
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=user_prompt)
+        ]
+        # Invoke the structured LLM client with the list of messages
+        structured_llm = self.llm.with_structured_output(json_schema_sql_prompts)
+        response = structured_llm.invoke(messages)
+
+        # Return the content of the response
+        sql_prompts = response["sql_prompts"]
+        return sql_prompts
+        

@@ -1,0 +1,38 @@
+<h3>Patient Note Summary</h3>
+    {% if request.patient_info %}
+        <h4>Patient Information:</h4>
+        <ul>
+            {% for key, value in request.patient_info.items() %}
+                <li><strong>{{ key.replace('_', ' ') | capitalize }}:</strong> {{ value }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% if response.error %}
+    <h3 style="color: red;">Error:</h3>
+    <p>{{ response.error }}</p>
+{% elif response.info %}    
+    <h3 style="color: blue;">Info:</h3>
+    <p>{{ response.info }}</p>
+{% else %}
+    <div>
+        {% macro render(data) %}
+            {% if data is mapping %}
+                <ul>
+                    {% for key, value in data.items() %}
+                        <li><strong>{{ key }}:</strong> {{ render(value) }}</li>
+                    {% endfor %}
+                </ul>
+            {% elif data is iterable and data is not string %}
+                <ul>
+                    {% for item in data %}
+                        <li>{{ render(item) }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                {{ data }}
+            {% endif %}
+        {% endmacro %}
+
+        {{ render(response) }}
+    </div>
+{% endif %}

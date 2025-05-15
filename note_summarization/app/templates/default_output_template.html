@@ -1,28 +1,57 @@
-{% if response.error %}
-    <h3 style="color: red;">Error:</h3>
-    <p>{{ response.error }}</p>
-{% else %}
-    <hr>
-    <h3>Patient Note Summary:</h3>
-    <div>
-        {% macro render(data) %}
-            {% if data is mapping %}
-                <ul>
-                    {% for key, value in data.items() %}
-                        <li><strong>{{ key }}:</strong> {{ render(value) }}</li>
-                    {% endfor %}
-                </ul>
-            {% elif data is iterable and data is not string %}
-                <ul>
-                    {% for item in data %}
-                        <li>{{ render(item) }}</li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                {{ data }}
-            {% endif %}
-        {% endmacro %}
-
-        {{ render(response) }}
-    </div>
+{% if response.title %}
+    <h3>{{ response.title }}</h3>
+{% else %}    
+    <h3>Patient Note Summary</h3>
 {% endif %}
+
+{% if request.patient_info %}
+    <h4>Patient {{ request.patient_info.first_name }} {{ request.patient_info.last_name }}</h4>
+{% endif %}
+
+{% if response.abstract %}
+    <h4>Abstract:</h4>
+    <p>{{ response.abstract }}</p>
+{% endif %}
+
+{% if response.context %}
+    <h4>Context:</h4>
+    <p>{{ response.context }}</p>
+{% endif %}
+
+{% if response.key_points %}
+    <h4>Key Points:</h4>
+    <ul>
+        {% for point in response.key_points %}
+            <li>{{ point }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% if response.data %}
+    <h4>Data:</h4>
+    <ul>
+        {% for entry in response.data %}
+            <li>
+                <strong>Category:</strong> {{ entry.category or "N/A" }}<br>
+                <strong>Details:</strong> {{ entry.details or "N/A" }}<br>
+                <strong>Date:</strong> {{ entry.date or "N/A" }}
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% if response.analysis %}
+    <h4>Analysis:</h4>
+    <p>{{ response.analysis }}</p>
+{% endif %}
+
+{% if response.recommendations %}
+    <h4>Recommendations:</h4>
+    <p>{{ response.recommendations }}</p>
+{% endif %}
+
+{% if response.conclusion %}
+    <h4>Conclusion:</h4>
+    <p>{{ response.conclusion }}</p>
+{% endif %}
+

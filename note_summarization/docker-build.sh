@@ -1,0 +1,1 @@
+docker build -t ghcr.io/inriva-ai/use-cases:latest .

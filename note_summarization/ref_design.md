@@ -107,7 +107,7 @@ The solution architecture focuses on two major pipeline:
    - **Reasoning**: Supports hybrid deployment models, allowing both cloud-based and on-prem inference.
 
 6. **Response Generation & Summarization**  
-   - **Tool**: `LangChain Prompt Templates`  
+   - **Tool**: `LangChain Structured Output`, `Jinja2` (optional) 
    - **Reasoning**: Ensures structured, template-based responses for consistent medical summaries.
 
 ---

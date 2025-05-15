@@ -15,6 +15,12 @@
         <label>Template:</label><br>
         <select id="template-name" aria-label="Template Name"></select><br><br>
 
+        <!-- Custom Prompt Field -->
+        <div id="custom-prompt-container" style="display: none;">
+            <label>Custom Prompt:</label><br>
+            <textarea id="custom-prompt" aria-label="Custom Prompt" style="width: 70%;"></textarea><br><br>
+        </div>
+
         <button type="submit">Submit</button>
     </form>
 
@@ -26,11 +32,13 @@
         const form = document.getElementById("prompt-form");
         const templateSelect = document.getElementById("template-name");
         const outputDiv = document.getElementById("output");
+const customPromptContainer = document.getElementById("custom-prompt-container");
+        const customPromptInput = document.getElementById("custom-prompt");
 
         // Fetch templates dynamically
         async function fetchTemplates() {
             try {
-                const res = await fetch("/templates");
+                const res = await fetch("./templates");
                 if (!res.ok) throw new Error("Failed to fetch templates.");
                 const data = await res.json();
                 templateSelect.innerHTML = `<option value="" disabled selected>--select template--</option>` +
@@ -41,6 +49,16 @@
                 alert(`${error}`);
             }
         }
+
+        // Show or hide the custom prompt field based on template selection
+        templateSelect.addEventListener("change", () => {
+            if (templateSelect.value === "custom") {
+                customPromptContainer.style.display = "block";
+            } else {
+                customPromptContainer.style.display = "none";
+                customPromptInput.value = ""; // Clear the custom prompt input
+            }
+        });
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -59,7 +77,8 @@
                     first_name: document.getElementById("first-name").value.trim(),
                     last_name: document.getElementById("last-name").value.trim()
                 },
-                template_name: templateSelect.value
+                template_id: templateSelect.value,
+                prompt: customPromptInput.value.trim() // Include custom prompt in payload
             };
 
             try {
