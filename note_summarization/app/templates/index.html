@@ -82,7 +82,7 @@ const customPromptContainer = document.getElementById("custom-prompt-container")
             };
 
             try {
-                const res = await fetch("/answer", {
+                const res = await fetch("answer", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)

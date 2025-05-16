@@ -56,7 +56,7 @@ def create_patient_note_summary(note_summarizer, patient_info, template_id, cust
     
     # Load the template
     template = patient_templates[template_id].copy()
-    print(f"Processing template: {template["name"]}")
+    print(f"Processing template: {template['name']}")
 
     # Custom template handling
     is_custom_prompt = False
@@ -85,10 +85,10 @@ def create_patient_note_summary(note_summarizer, patient_info, template_id, cust
     try:
         note_summary = ns_utils.generate_patient_summary(note_summarizer, patient_info=patient_info, template=template)
     except Exception as e:
-        print(f"Error processing template {template["name"]}: {e}")
+        print(f"Error processing template {template['name']}: {e}")
         return
     
-    ns_filename = OUTPUT_DIR / f"note_summary_{template_id}_{patient_info["first_name"]}_{patient_info["last_name"]}.json"
+    ns_filename = OUTPUT_DIR / f"note_summary_{template_id}_{patient_info['first_name']}_{patient_info['last_name']}.json"
     with open(ns_filename, "w") as file:
         json.dump(note_summary, file, indent=4)
     print(f"Summary saved to {ns_filename}")
