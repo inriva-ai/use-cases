@@ -7,7 +7,7 @@
         "data": {
           "sourceHandle": {
             "dataType": "ChatInput",
-            "id": "ChatInput-LoC4w",
+            "id": "ChatInput-D7tbc",
             "name": "message",
             "output_types": [
               "Message"
@@ -15,19 +15,19 @@
           },
           "targetHandle": {
             "fieldName": "input_value",
-            "id": "Agent-1rN14",
+            "id": "Agent-AyLxL",
             "inputTypes": [
               "Message"
             ],
             "type": "str"
           }
         },
-        "id": "reactflow__edge-ChatInput-LoC4w{œdataTypeœ:œChatInputœ,œidœ:œChatInput-LoC4wœ,œnameœ:œmessageœ,œoutput_typesœ:[œMessageœ]}-Agent-1rN14{œfieldNameœ:œinput_valueœ,œidœ:œAgent-1rN14œ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "id": "reactflow__edge-ChatInput-D7tbc{œdataTypeœ:œChatInputœ,œidœ:œChatInput-D7tbcœ,œnameœ:œmessageœ,œoutput_typesœ:[œMessageœ]}-Agent-AyLxL{œfieldNameœ:œinput_valueœ,œidœ:œAgent-AyLxLœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
         "selected": false,
-        "source": "ChatInput-LoC4w",
-        "sourceHandle": "{œdataTypeœ:œChatInputœ,œidœ:œChatInput-LoC4wœ,œnameœ:œmessageœ,œoutput_typesœ:[œMessageœ]}",
-        "target": "Agent-1rN14",
-        "targetHandle": "{œfieldNameœ:œinput_valueœ,œidœ:œAgent-1rN14œ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}"
+        "source": "ChatInput-D7tbc",
+        "sourceHandle": "{œdataTypeœ:œChatInputœ,œidœ:œChatInput-D7tbcœ,œnameœ:œmessageœ,œoutput_typesœ:[œMessageœ]}",
+        "target": "Agent-AyLxL",
+        "targetHandle": "{œfieldNameœ:œinput_valueœ,œidœ:œAgent-AyLxLœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}"
       },
       {
         "animated": false,
@@ -35,7 +35,7 @@
         "data": {
           "sourceHandle": {
             "dataType": "PythonREPLComponent",
-            "id": "PythonREPLComponent-EKJFA",
+            "id": "PythonREPLComponent-i11J1",
             "name": "component_as_tool",
             "output_types": [
               "Tool"
@@ -43,19 +43,19 @@
           },
           "targetHandle": {
             "fieldName": "tools",
-            "id": "Agent-1rN14",
+            "id": "Agent-AyLxL",
             "inputTypes": [
               "Tool"
             ],
             "type": "other"
           }
         },
-        "id": "reactflow__edge-PythonREPLComponent-EKJFA{œdataTypeœ:œPythonREPLComponentœ,œidœ:œPythonREPLComponent-EKJFAœ,œnameœ:œcomponent_as_toolœ,œoutput_typesœ:[œToolœ]}-Agent-1rN14{œfieldNameœ:œtoolsœ,œidœ:œAgent-1rN14œ,œinputTypesœ:[œToolœ],œtypeœ:œotherœ}",
+        "id": "reactflow__edge-PythonREPLComponent-i11J1{œdataTypeœ:œPythonREPLComponentœ,œidœ:œPythonREPLComponent-i11J1œ,œnameœ:œcomponent_as_toolœ,œoutput_typesœ:[œToolœ]}-Agent-AyLxL{œfieldNameœ:œtoolsœ,œidœ:œAgent-AyLxLœ,œinputTypesœ:[œToolœ],œtypeœ:œotherœ}",
         "selected": false,
-        "source": "PythonREPLComponent-EKJFA",
-        "sourceHandle": "{œdataTypeœ:œPythonREPLComponentœ,œidœ:œPythonREPLComponent-EKJFAœ,œnameœ:œcomponent_as_toolœ,œoutput_typesœ:[œToolœ]}",
-        "target": "Agent-1rN14",
-        "targetHandle": "{œfieldNameœ:œtoolsœ,œidœ:œAgent-1rN14œ,œinputTypesœ:[œToolœ],œtypeœ:œotherœ}"
+        "source": "PythonREPLComponent-i11J1",
+        "sourceHandle": "{œdataTypeœ:œPythonREPLComponentœ,œidœ:œPythonREPLComponent-i11J1œ,œnameœ:œcomponent_as_toolœ,œoutput_typesœ:[œToolœ]}",
+        "target": "Agent-AyLxL",
+        "targetHandle": "{œfieldNameœ:œtoolsœ,œidœ:œAgent-AyLxLœ,œinputTypesœ:[œToolœ],œtypeœ:œotherœ}"
       },
       {
         "animated": false,
@@ -63,7 +63,7 @@
         "data": {
           "sourceHandle": {
             "dataType": "Agent",
-            "id": "Agent-1rN14",
+            "id": "Agent-AyLxL",
             "name": "response",
             "output_types": [
               "Message"
@@ -71,7 +71,7 @@
           },
           "targetHandle": {
             "fieldName": "input_value",
-            "id": "ChatOutput-JL32L",
+            "id": "ChatOutput-8U7rO",
             "inputTypes": [
               "Data",
               "DataFrame",
@@ -80,18 +80,18 @@
             "type": "other"
           }
         },
-        "id": "xy-edge__Agent-1rN14{œdataTypeœ:œAgentœ,œidœ:œAgent-1rN14œ,œnameœ:œresponseœ,œoutput_typesœ:[œMessageœ]}-ChatOutput-JL32L{œfieldNameœ:œinput_valueœ,œidœ:œChatOutput-JL32Lœ,œinputTypesœ:[œDataœ,œDataFrameœ,œMessageœ],œtypeœ:œotherœ}",
+        "id": "reactflow__edge-Agent-AyLxL{œdataTypeœ:œAgentœ,œidœ:œAgent-AyLxLœ,œnameœ:œresponseœ,œoutput_typesœ:[œMessageœ]}-ChatOutput-8U7rO{œfieldNameœ:œinput_valueœ,œidœ:œChatOutput-8U7rOœ,œinputTypesœ:[œDataœ,œDataFrameœ,œMessageœ],œtypeœ:œotherœ}",
         "selected": false,
-        "source": "Agent-1rN14",
-        "sourceHandle": "{œdataTypeœ:œAgentœ,œidœ:œAgent-1rN14œ,œnameœ:œresponseœ,œoutput_typesœ:[œMessageœ]}",
-        "target": "ChatOutput-JL32L",
-        "targetHandle": "{œfieldNameœ:œinput_valueœ,œidœ:œChatOutput-JL32Lœ,œinputTypesœ:[œDataœ,œDataFrameœ,œMessageœ],œtypeœ:œotherœ}"
+        "source": "Agent-AyLxL",
+        "sourceHandle": "{œdataTypeœ:œAgentœ,œidœ:œAgent-AyLxLœ,œnameœ:œresponseœ,œoutput_typesœ:[œMessageœ]}",
+        "target": "ChatOutput-8U7rO",
+        "targetHandle": "{œfieldNameœ:œinput_valueœ,œidœ:œChatOutput-8U7rOœ,œinputTypesœ:[œDataœ,œDataFrameœ,œMessageœ],œtypeœ:œotherœ}"
       }
     ],
     "nodes": [
       {
         "data": {
-          "id": "ChatInput-LoC4w",
+          "id": "ChatInput-D7tbc",
           "node": {
             "base_classes": [
               "Message"
@@ -117,7 +117,7 @@
             "frozen": false,
             "icon": "MessagesSquare",
             "legacy": false,
-            "lf_version": "1.4.1",
+            "lf_version": "1.3.2",
             "metadata": {},
             "minimized": true,
             "output_types": [],
@@ -388,7 +388,7 @@
           "type": "ChatInput"
         },
         "dragging": false,
-        "id": "ChatInput-LoC4w",
+        "id": "ChatInput-D7tbc",
         "measured": {
           "height": 66,
           "width": 192
@@ -402,7 +402,7 @@
       },
       {
         "data": {
-          "id": "Agent-1rN14",
+          "id": "Agent-AyLxL",
           "node": {
             "base_classes": [
               "Message"
@@ -445,7 +445,7 @@
             "frozen": false,
             "icon": "bot",
             "legacy": false,
-            "lf_version": "1.4.1",
+            "lf_version": "1.3.2",
             "metadata": {},
             "minimized": false,
             "output_types": [],
@@ -987,7 +987,7 @@
                 "trace_as_input": true,
                 "trace_as_metadata": true,
                 "type": "str",
-                "value": "You are an assistant who answers user questions about patients. Before answering any question, ensure it includes both the patient’s first and last names. If either is missing, prompt the user to provide that information first.\n\n[ USER NOTE This is a clarification. The Agent will ignore this section.\nAPI Endpoint Notes\nDepending on the environment, the FastAPI app may be accessible via one of the following DNS names:\n\n* ns-fastapi-app (when both services run in Docker Compose)\n\n* host.docker.internal (when FastAPI runs on the host, and Langflow runs in Docker)\n\n* localhost (when both services run on the host)\n\nEnter correct DNS name for the assumption below\n]\n\nAssume DNS name ns-fastapi-app equals to host.docker.internal\n1. Retrieve available templates:\n\n* Generate Python code to perform a GET request to: \nhttp://ns-fastapi-app:8085/templates \n\n* The response will contain a list of tuples in the form:\n(\"template id\", \"template name\")\n\n* Choose the most appropriate template for the question. Use the custom template if no other predefined template cannot be used to answer the question.\n\n2. Generate the patient note summary:\n\n* Generate Python code to perform a POST request to:\nhttp://ns-fastapi-app:8085/answer \nor\nhttp://host.docker.internal:8085/answer\n\n* Include a JSON payload in the following format:\n{\n  \"patient_info\": {\n    \"first_name\": \"<first name>\",\n    \"last_name\": \"<last name>\"\n  },\n  \"template_id\": \"<template id>\",\n  \"prompt\": \"<question>\"  // Only include this field if using the custom template\n}\n\n* Replace placeholders with:\n** The actual first and last names\n** The selected template ID\n** The user’s question (only if the custom template is used)\n\n3. Render the HTML response:\n\nThe API response will be in HTML format.\n\n* Execute the generated Python code internally.\n\n* Do not display the code to the user.\n\n* Return the rendered HTML output — not the raw HTML tags."
+                "value": "You are an assistant who answers user questions about patients. Before answering any question, ensure it includes both the patient’s first and last names. If either is missing, prompt the user to provide that information first.\n\n[ USER NOTE This is a clarification. The Agent will ignore this section.\nAPI Endpoint Notes\nDepending on the environment, the FastAPI app may be accessible via one of the following DNS names:\n\n* http://ns-fastapi-app:8085 (when both services run in Docker Compose)\n\n* http://host.docker.internal:8085 (when FastAPI runs on the host, and Langflow runs in Docker)\n\n* http://localhost:8085 (when both services run on the host)\n\n* https://1486ab04-be23-45e3-8eb9-8cff161a1701.dev.officekube.io/dev (when FastAPI app runs on officekube VM)\n\nEnter correct DNS name for the assumption below\n]\n\nAssume DNS name <fast-api-service>  equals to https://1486ab04-be23-45e3-8eb9-8cff161a1701.dev.officekube.io/dev\n1. Retrieve available templates:\n\n* Generate Python code to perform a GET request to: \n<fast-api-service>/templates \n\n* The response will contain a list of tuples in the form:\n(\"template id\", \"template name\")\n\n* Choose the most appropriate template for the question. Use the custom template if no other predefined template cannot be used to answer the question.\n\n2. Generate the patient note summary:\n\n* Generate Python code to perform a POST request to:\n<fast-api-service>/answer\n\n* Include a JSON payload in the following format:\n{\n  \"patient_info\": {\n    \"first_name\": \"<first name>\",\n    \"last_name\": \"<last name>\"\n  },\n  \"template_id\": \"<template id>\",\n  \"prompt\": \"<question>\"  // Only include this field if using the custom template\n}\n\n* Replace placeholders with:\n** The actual first and last names\n** The selected template ID\n** The user’s question (only if the custom template is used)\n\n3. Render the HTML response:\n\nThe API response will be in HTML format.\n\n* Execute the generated Python code internally.\n\n* Do not display the code to the user.\n\n* Return the rendered HTML output — not the raw HTML tags."
               },
               "temperature": {
                 "_input_type": "SliderInput",
@@ -1108,7 +1108,7 @@
           "type": "Agent"
         },
         "dragging": false,
-        "id": "Agent-1rN14",
+        "id": "Agent-AyLxL",
         "measured": {
           "height": 681,
           "width": 320
@@ -1122,7 +1122,7 @@
       },
       {
         "data": {
-          "id": "PythonREPLComponent-EKJFA",
+          "id": "PythonREPLComponent-i11J1",
           "node": {
             "base_classes": [
               "Data"
@@ -1141,7 +1141,7 @@
             "frozen": false,
             "icon": "Python",
             "legacy": false,
-            "lf_version": "1.4.1",
+            "lf_version": "1.3.2",
             "metadata": {},
             "minimized": false,
             "output_types": [],
@@ -1222,11 +1222,11 @@
                 "value": ""
               },
               "tools_metadata": {
-                "_input_type": "ToolsInput",
+                "_input_type": "TableInput",
                 "advanced": false,
-                "display_name": "Actions",
+                "display_name": "Edit tools",
                 "dynamic": false,
-                "info": "Modify tool names and descriptions to help agents understand when to use each tool.",
+                "info": "",
                 "is_list": true,
                 "list_add_label": "Add More",
                 "name": "tools_metadata",
@@ -1234,27 +1234,94 @@
                 "real_time_refresh": true,
                 "required": false,
                 "show": true,
+                "table_icon": "Hammer",
+                "table_options": {
+                  "block_add": true,
+                  "block_delete": true,
+                  "block_edit": true,
+                  "block_filter": true,
+                  "block_hide": true,
+                  "block_select": true,
+                  "block_sort": true,
+                  "description": "Modify tool names and descriptions to help agents understand when to use each tool.",
+                  "field_parsers": {
+                    "commands": "commands",
+                    "name": [
+                      "snake_case",
+                      "no_blank"
+                    ]
+                  },
+                  "hide_options": true
+                },
+                "table_schema": {
+                  "columns": [
+                    {
+                      "default": "None",
+                      "description": "Specify the name of the tool.",
+                      "disable_edit": false,
+                      "display_name": "Tool Name",
+                      "edit_mode": "inline",
+                      "filterable": false,
+                      "formatter": "text",
+                      "hidden": false,
+                      "name": "name",
+                      "sortable": false,
+                      "type": "str"
+                    },
+                    {
+                      "default": "None",
+                      "description": "Describe the purpose of the tool.",
+                      "disable_edit": false,
+                      "display_name": "Tool Description",
+                      "edit_mode": "popover",
+                      "filterable": false,
+                      "formatter": "text",
+                      "hidden": false,
+                      "name": "description",
+                      "sortable": false,
+                      "type": "str"
+                    },
+                    {
+                      "default": "None",
+                      "description": "The default identifiers for the tools and cannot be changed.",
+                      "disable_edit": true,
+                      "display_name": "Tool Identifiers",
+                      "edit_mode": "inline",
+                      "filterable": false,
+                      "formatter": "text",
+                      "hidden": true,
+                      "name": "tags",
+                      "sortable": false,
+                      "type": "str"
+                    },
+                    {
+                      "default": true,
+                      "description": "Indicates whether the tool is currently active. Set to True to activate this tool.",
+                      "disable_edit": false,
+                      "display_name": "Enable",
+                      "edit_mode": "popover",
+                      "filterable": true,
+                      "formatter": "boolean",
+                      "hidden": false,
+                      "name": "status",
+                      "sortable": true,
+                      "type": "boolean"
+                    }
+                  ]
+                },
                 "title_case": false,
                 "tool_mode": false,
                 "trace_as_metadata": true,
-                "type": "tools",
+                "trigger_icon": "Hammer",
+                "trigger_text": "",
+                "type": "table",
                 "value": [
                   {
-                    "args": {
-                      "python_code": {
-                        "description": "The Python code to execute. Only modules specified in Global Imports can be used.",
-                        "title": "Python Code",
-                        "type": "string"
-                      }
-                    },
-                    "description": "PythonREPLComponent. run_python_repl - A Python code executor that lets you run Python code with specific imported modules. Remember to always use print() to see your results. Example: print(df.head())",
-                    "display_description": "PythonREPLComponent. run_python_repl - A Python code executor that lets you run Python code with specific imported modules. Remember to always use print() to see your results. Example: print(df.head())",
-                    "display_name": "run_python_repl",
-                    "name": "run_python_repl",
-                    "readonly": false,
+                    "description": "run_python_repl(global_imports: FieldTypes.TEXT, python_code: FieldTypes.CODE) - A Python code executor that lets you run Python code with specific imported modules. Remember to always use print() to see your results. Example: print(df.head())",
+                    "name": "PythonREPLComponent-run_python_repl",
                     "status": true,
                     "tags": [
-                      "run_python_repl"
+                      "PythonREPLComponent-run_python_repl"
                     ]
                   }
                 ]
@@ -1266,9 +1333,9 @@
           "type": "PythonREPLComponent"
         },
         "dragging": false,
-        "id": "PythonREPLComponent-EKJFA",
+        "id": "PythonREPLComponent-i11J1",
         "measured": {
-          "height": 349,
+          "height": 353,
           "width": 320
         },
         "position": {
@@ -1280,7 +1347,7 @@
       },
       {
         "data": {
-          "id": "ChatOutput-JL32L",
+          "id": "ChatOutput-8U7rO",
           "node": {
             "base_classes": [
               "Message"
@@ -1307,7 +1374,7 @@
             "frozen": false,
             "icon": "MessagesSquare",
             "legacy": false,
-            "lf_version": "1.4.1",
+            "lf_version": "1.3.2",
             "metadata": {},
             "minimized": true,
             "output_types": [],
@@ -1574,7 +1641,7 @@
           "type": "ChatOutput"
         },
         "dragging": false,
-        "id": "ChatOutput-JL32L",
+        "id": "ChatOutput-8U7rO",
         "measured": {
           "height": 66,
           "width": 192
@@ -1588,16 +1655,16 @@
       }
     ],
     "viewport": {
-      "x": 1058.2118758618426,
-      "y": -476.85979429403665,
-      "zoom": 1.6563348576436443
+      "x": 1058.9070740542236,
+      "y": -472.82199167429235,
+      "zoom": 1.6422560288265613
     }
   },
   "description": "Prototype for the AI-powered patient note summary tool ",
   "endpoint_name": null,
-  "id": "1e85adfd-5637-449f-9620-033889eaab57",
+  "id": "64ec31c3-1079-496a-a2ba-44632624980d",
   "is_component": false,
-  "last_tested_version": "1.4.1",
-  "name": "InRiva Patient Note Summarization",
+  "last_tested_version": "1.3.2",
+  "name": "InRiva Patient Note Summarization - New",
   "tags": []
 }
